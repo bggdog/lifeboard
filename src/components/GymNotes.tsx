@@ -7,7 +7,7 @@ import { Lift, LiftEntry } from '../types';
 
 const GymNotes = () => {
   const navigate = useNavigate();
-  const { state, addLift, updateLift, deleteLift, addLiftEntry, updateLiftEntry, deleteLiftEntry } = useApp();
+  const { state, addLift, updateLift, deleteLift, addLiftEntry, deleteLiftEntry } = useApp();
   const [showAddLift, setShowAddLift] = useState(false);
   const [editingLift, setEditingLift] = useState<Lift | null>(null);
   const [newLiftName, setNewLiftName] = useState('');

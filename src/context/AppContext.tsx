@@ -140,6 +140,12 @@ interface AppContextType {
   addEdit: (edit: Edit) => Promise<void>;
   updateEdit: (edit: Edit) => Promise<void>;
   deleteEdit: (id: string) => Promise<void>;
+  addLift: (lift: Lift) => Promise<void>;
+  updateLift: (lift: Lift) => Promise<void>;
+  deleteLift: (id: string) => Promise<void>;
+  addLiftEntry: (entry: LiftEntry) => Promise<void>;
+  updateLiftEntry: (entry: LiftEntry) => Promise<void>;
+  deleteLiftEntry: (id: string) => Promise<void>;
   addReward: (reward: Reward) => Promise<void>;
   updateReward: (reward: Reward) => Promise<void>;
   deleteReward: (id: string) => Promise<void>;
