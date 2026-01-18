@@ -4,7 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-neutral-50 text-neutral-800 antialiased;
+    @apply text-neutral-800 antialiased;
+    background-image: url('/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
   }
 }
 
