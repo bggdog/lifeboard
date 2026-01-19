@@ -30,8 +30,7 @@ export { getSupabase };
 export const db = {
   // Habits
   async getHabits() {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('habits')
       .select('*')
       .order('created_at', { ascending: false });
