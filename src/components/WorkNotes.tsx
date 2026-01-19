@@ -93,17 +93,22 @@ const WorkNotes = () => {
   const handleAddEdit = async () => {
     if (!newEditTitle.trim()) return;
 
-    const edit: Edit = {
-      id: `edit-${Date.now()}-${Math.random()}`,
-      title: newEditTitle.trim(),
-      type: newEditType,
-      completed: false,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const edit: Edit = {
+        id: `edit-${Date.now()}-${Math.random()}`,
+        title: newEditTitle.trim(),
+        type: newEditType,
+        completed: false,
+        createdAt: new Date().toISOString(),
+      };
 
-    await addEdit(edit);
-    setNewEditTitle('');
-    setNewEditType('short-form');
+      await addEdit(edit);
+      setNewEditTitle('');
+      setNewEditType('short-form');
+    } catch (error: any) {
+      console.error('Error adding edit:', error);
+      alert(`Failed to add edit: ${error?.message || 'Unknown error'}`);
+    }
   };
 
   const handleToggleEdit = async (edit: Edit) => {
@@ -202,9 +207,10 @@ const WorkNotes = () => {
                         placeholder="Enter edit title (e.g., 'Video about productivity tips')"
                         value={newEditTitle}
                         onChange={(e) => setNewEditTitle(e.target.value)}
-                        onKeyDown={(e) => {
+                        onKeyDown={async (e) => {
                           if (e.key === 'Enter') {
-                            handleAddEdit();
+                            e.preventDefault();
+                            await handleAddEdit();
                           }
                         }}
                         className="input w-full text-base py-3 px-4 bg-white border-2 border-neutral-300 focus:border-accent focus:ring-2 focus:ring-accent/20"
@@ -228,9 +234,14 @@ const WorkNotes = () => {
                       </div>
                       <div className="flex items-end">
                         <button 
-                          onClick={handleAddEdit} 
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            await handleAddEdit();
+                          }}
                           className="btn-primary px-6 py-3 text-base font-semibold h-fit"
                           disabled={!newEditTitle.trim()}
+                          type="button"
                         >
                           Add Edit
                         </button>
