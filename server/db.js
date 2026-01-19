@@ -477,7 +477,7 @@ export const db = {
         config: m.config ? JSON.stringify(m.config) : null,
       }));
       
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('dashboard_modules')
         .insert(modulesData);
       if (error) throw error;
