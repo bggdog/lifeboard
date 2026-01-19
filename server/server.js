@@ -35,26 +35,19 @@ const initializeDefaults = async () => {
 // Initialize defaults on import (works for both serverless and regular server)
 // Don't await in module scope for serverless - it will be called on first request
 // For Vercel, we'll initialize on first request instead
+let initialized = false;
 if (process.env.VERCEL !== '1') {
   initializeDefaults();
-} else {
-  // For Vercel, initialize on first health check
-  let initialized = false;
-  app.get('/api/health', async (req, res) => {
-    if (!initialized) {
-      await initializeDefaults();
-      initialized = true;
-    }
-    res.json({ status: 'ok', message: 'Backend server is running', database: 'Supabase' });
-  });
 }
 
-// Health check endpoint (only if not in Vercel, otherwise handled above)
-if (process.env.VERCEL !== '1') {
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Backend server is running', database: 'Supabase' });
-  });
-}
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  if (!initialized && process.env.VERCEL === '1') {
+    await initializeDefaults();
+    initialized = true;
+  }
+  res.json({ status: 'ok', message: 'Backend server is running', database: 'Supabase' });
+});
 
 // Get all state
 app.get('/api/state', async (req, res) => {
