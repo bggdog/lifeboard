@@ -33,7 +33,10 @@ const initializeDefaults = async () => {
 };
 
 // Initialize defaults on import (works for both serverless and regular server)
-initializeDefaults();
+// Don't await in module scope for serverless - it will be called on first request
+if (process.env.VERCEL !== '1') {
+  initializeDefaults();
+}
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

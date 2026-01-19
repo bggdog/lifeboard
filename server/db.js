@@ -10,16 +10,27 @@ if (process.env.VERCEL !== '1') {
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY');
+// Initialize Supabase client
+// In Vercel, environment variables are available at runtime
+let supabase = null;
+
+function getSupabase() {
+  if (!supabase) {
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel environment variables.');
+    }
+    supabase = createClient(supabaseUrl, supabaseKey);
+  }
+  return supabase;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export { getSupabase };
 
 // Database helper functions
 export const db = {
   // Habits
   async getHabits() {
+    const supabase = getSupabase();
     const { data, error } = await supabase
       .from('habits')
       .select('*')
@@ -39,7 +50,7 @@ export const db = {
   },
 
   async addHabit(habit) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('habits')
       .insert({
         id: habit.id,
@@ -78,7 +89,7 @@ export const db = {
     if (updates.archived !== undefined) updateData.archived = updates.archived;
     if (updates.emoji !== undefined) updateData.emoji = updates.emoji || null;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('habits')
       .update(updateData)
       .eq('id', id)
@@ -448,7 +459,7 @@ export const db = {
   },
 
   async setDashboardModules(modules) {
-    await supabase.from('dashboard_modules').delete().neq('id', '0');
+    await getSupabase().from('dashboard_modules').delete().neq('id', '0');
     
     if (modules.length > 0) {
       const modulesData = modules.map(m => ({
