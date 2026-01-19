@@ -157,9 +157,9 @@ app.delete('/api/habit-completions/:habitId/:date', async (req, res) => {
 // Todos
 app.post('/api/todos', async (req, res) => {
   try {
-    await db.addTodo(req.body);
-    res.json({ success: true });
-  } catch (error) {
+    const result = await db.addTodo(req.body);
+    res.json({ success: true, data: result });
+  } catch (error: any) {
     console.error('Error creating todo:', error);
     res.status(500).json({ error: 'Failed to create todo', details: error.message });
   }

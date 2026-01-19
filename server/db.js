@@ -169,6 +169,8 @@ export const db = {
       createdAt: todo.created_at,
       completedAt: todo.completed_at,
       order: todo.todo_order,
+      isWork: todo.is_work || false,
+      workDate: todo.work_date || undefined,
     }));
   },
 

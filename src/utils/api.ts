@@ -90,7 +90,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(todo),
     });
-    if (!response.ok) throw new Error('Failed to create todo');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create todo';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
