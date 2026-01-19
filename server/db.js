@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
 
 // Load environment variables from .env file (only for local development)
 // Vercel provides environment variables automatically, so we skip in production
-if (process.env.VERCEL !== '1') {
-  dotenv.config();
+let dotenv;
+try {
+  if (process.env.VERCEL !== '1') {
+    dotenv = await import('dotenv');
+    dotenv.default.config();
+  }
+} catch (dotenvError) {
+  // dotenv not available or not needed - this is fine
+  console.log('[db.js] dotenv not loaded (expected in Vercel):', dotenvError?.message);
 }
 
 // Read env vars at module load (may be undefined in Vercel until runtime)
@@ -89,7 +95,7 @@ function getSupabase() {
         hypothesisId: 'B'
       });
       // #endregion
-    } catch (createError: any) {
+    } catch (createError) {
       // #region agent log
       console.error('[getSupabase] Client creation failed', {
         error: createError?.message,
@@ -670,7 +676,7 @@ export const db = {
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:SUPABASE_READY',message:'Supabase client obtained',data:{clientType:typeof supabaseClient},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
-    } catch (supabaseError: any) {
+    } catch (supabaseError) {
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:SUPABASE_ERROR',message:'Failed to get Supabase client',data:{error:supabaseError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
