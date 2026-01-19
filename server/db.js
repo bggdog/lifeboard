@@ -587,20 +587,42 @@ export const db = {
   },
 
   async addEdit(edit) {
-    const { data, error } = await supabase
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:ENTRY',message:'addEdit called',data:{editId:edit?.id,editTitle:edit?.title,hasSupabaseUrl:!!process.env.SUPABASE_URL,hasSupabaseKey:!!process.env.SUPABASE_ANON_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    let supabaseClient;
+    try {
+      supabaseClient = getSupabase();
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:SUPABASE_READY',message:'Supabase client obtained',data:{clientType:typeof supabaseClient},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+    } catch (supabaseError: any) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:SUPABASE_ERROR',message:'Failed to get Supabase client',data:{error:supabaseError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      throw supabaseError;
+    }
+    const insertData = {
+      id: edit.id,
+      title: edit.title,
+      type: edit.type,
+      completed: edit.completed || false,
+      created_at: edit.createdAt,
+      completed_at: edit.completedAt || null,
+    };
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:BEFORE_INSERT',message:'Before Supabase insert',data:{insertData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    const { data, error } = await supabaseClient
       .from('edits')
-      .insert({
-        id: edit.id,
-        title: edit.title,
-        type: edit.type,
-        completed: edit.completed || false,
-        created_at: edit.createdAt,
-        completed_at: edit.completedAt || null,
-      })
+      .insert(insertData)
       .select()
       .single();
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:AFTER_INSERT',message:'Supabase insert result',data:{hasData:!!data,hasError:!!error,errorMessage:error?.message,errorCode:error?.code,errorDetails:error?.details,errorHint:error?.hint},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     if (error) throw error;
-    return {
+    const result = {
       id: data.id,
       title: data.title,
       type: data.type,
@@ -608,6 +630,10 @@ export const db = {
       createdAt: data.created_at,
       completedAt: data.completed_at || undefined,
     };
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:SUCCESS',message:'addEdit completed',data:{resultId:result.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    return result;
   },
 
   async updateEdit(id, updates) {
