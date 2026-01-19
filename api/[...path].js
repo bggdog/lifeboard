@@ -29,7 +29,7 @@ export default async (req, res) => {
         details: `Type: ${typeof serverCache}`
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('[VERCEL HANDLER] CRITICAL ERROR:', {
       message: error?.message,
       stack: error?.stack,
