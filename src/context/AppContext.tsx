@@ -211,7 +211,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Load state on mount
     refreshState();
+    
+    // Periodically refresh state to keep data in sync across devices
+    const refreshInterval = setInterval(() => {
+      refreshState();
+    }, 30000); // Refresh every 30 seconds
+    
+    // Also refresh when window regains focus (user switches back to app)
+    const handleFocus = () => {
+      refreshState();
+    };
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      clearInterval(refreshInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const addHabit = async (habit: Habit) => {

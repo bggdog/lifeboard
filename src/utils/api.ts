@@ -1,10 +1,43 @@
-const API_BASE = (import.meta as any).env?.VITE_API_URL || ((import.meta as any).env?.DEV ? '/api' : 'http://localhost:3001/api');
+// Determine API base URL
+// In production (Vercel), use relative /api which routes to serverless functions
+// In development, use localhost if VITE_API_URL is not set
+const getApiBase = () => {
+  // If VITE_API_URL is explicitly set, use it
+  if ((import.meta as any).env?.VITE_API_URL) {
+    return (import.meta as any).env.VITE_API_URL;
+  }
+  
+  // In development mode, use localhost
+  if ((import.meta as any).env?.DEV) {
+    return 'http://localhost:3001/api';
+  }
+  
+  // In production, use relative URL (works with Vercel serverless functions)
+  return '/api';
+};
+
+const API_BASE = getApiBase();
 
 export const api = {
   async getState() {
-    const response = await fetch(`${API_BASE}/state`);
-    if (!response.ok) throw new Error('Failed to fetch state');
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE}/state`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add cache control to ensure fresh data
+        cache: 'no-cache',
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch state: ${response.status} ${errorText || response.statusText}`);
+      }
+      return response.json();
+    } catch (error: any) {
+      console.error('API Error in getState:', error);
+      throw error;
+    }
   },
 
   async createHabit(habit: any) {

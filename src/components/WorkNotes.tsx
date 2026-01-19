@@ -18,6 +18,9 @@ const WorkNotes = () => {
   const [showEditList, setShowEditList] = useState(true);
   const [newEditTitle, setNewEditTitle] = useState('');
   const [newEditType, setNewEditType] = useState<EditType>('short-form');
+  const [showAddWorkTodoForm, setShowAddWorkTodoForm] = useState(false);
+  const [newWorkTodoText, setNewWorkTodoText] = useState('');
+  const [newWorkTodoTokens, setNewWorkTodoTokens] = useState<number | undefined>(undefined);
 
   // Get work todos for selected date
   const workTodos = (state.todos || [])
@@ -63,16 +66,28 @@ const WorkNotes = () => {
   };
 
   const handleAddWorkTodo = async () => {
-    const newTodo: Todo = {
-      id: `todo-${Date.now()}-${Math.random()}`,
-      text: '',
-      completed: false,
-      createdAt: new Date().toISOString(),
-      order: workTodos.length,
-      isWork: true,
-      workDate: selectedDate,
-    };
-    await addTodo(newTodo);
+    if (!newWorkTodoText.trim()) return;
+
+    try {
+      const newTodo: Todo = {
+        id: `todo-${Date.now()}-${Math.random()}`,
+        text: newWorkTodoText.trim(),
+        completed: false,
+        tokenReward: newWorkTodoTokens,
+        createdAt: new Date().toISOString(),
+        order: workTodos.length,
+        isWork: true,
+        workDate: selectedDate,
+      };
+
+      await addTodo(newTodo);
+      setNewWorkTodoText('');
+      setNewWorkTodoTokens(undefined);
+      setShowAddWorkTodoForm(false);
+    } catch (error: any) {
+      console.error('Error adding work todo:', error);
+      alert(`Failed to add work todo: ${error?.message || 'Unknown error'}`);
+    }
   };
 
   const handleAddEdit = async () => {
@@ -332,18 +347,79 @@ const WorkNotes = () => {
                   To-Dos for {format(new Date(selectedDate), 'MMM d, yyyy')}
                 </h3>
                 <button
-                  onClick={handleAddWorkTodo}
-                  className="p-2 rounded-button hover:bg-neutral-100 transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowAddWorkTodoForm(true);
+                  }}
+                  className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 hover:rotate-90"
+                  type="button"
                 >
-                  <Plus className="w-4 h-4 text-neutral-600" />
+                  <Plus className="w-4 h-4 text-neutral-600 transition-transform" />
                 </button>
               </div>
+
+              {showAddWorkTodoForm && (
+                <div className="mb-4 p-4 bg-neutral-50 rounded-card space-y-2 animate-slide-in">
+                  <input
+                    type="text"
+                    placeholder="What needs to be done?"
+                    value={newWorkTodoText}
+                    onChange={(e) => setNewWorkTodoText(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        await handleAddWorkTodo();
+                      } else if (e.key === 'Escape') {
+                        setShowAddWorkTodoForm(false);
+                        setNewWorkTodoText('');
+                        setNewWorkTodoTokens(undefined);
+                      }
+                    }}
+                    className="input"
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      placeholder="💰 Reward (optional)"
+                      value={newWorkTodoTokens || ''}
+                      onChange={(e) => setNewWorkTodoTokens(e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="input flex-1"
+                      min="1"
+                    />
+                    <button 
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        await handleAddWorkTodo();
+                      }}
+                      className="btn-primary"
+                      type="button"
+                      disabled={!newWorkTodoText.trim()}
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAddWorkTodoForm(false);
+                        setNewWorkTodoText('');
+                        setNewWorkTodoTokens(undefined);
+                      }}
+                      className="p-2 rounded-button hover:bg-white transition-colors"
+                      type="button"
+                    >
+                      <X className="w-4 h-4 text-neutral-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {workTodos.length === 0 ? (
                 <div className="text-center py-8 text-neutral-500">
                   <p>No work todos for this date.</p>
                   <button
-                    onClick={handleAddWorkTodo}
+                    onClick={() => setShowAddWorkTodoForm(true)}
                     className="mt-3 text-sm text-accent hover:text-accent-dark font-medium"
                   >
                     Add your first work todo
@@ -383,7 +459,16 @@ const WorkNotes = () => {
                                   type="text"
                                   value={todo.text}
                                   onChange={(e) => updateTodo({ ...todo, text: e.target.value })}
-                                  onBlur={() => updateTodo(todo)}
+                                  onBlur={async () => {
+                                    if (todo.text.trim()) {
+                                      await updateTodo(todo);
+                                    }
+                                  }}
+                                  onKeyDown={async (e) => {
+                                    if (e.key === 'Enter') {
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
                                   className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-neutral-900"
                                   placeholder="Work todo..."
                                 />
