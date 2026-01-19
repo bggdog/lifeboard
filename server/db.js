@@ -122,7 +122,7 @@ export const db = {
       .delete()
       .eq('habit_id', id);
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('habits')
       .delete()
       .eq('id', id);
@@ -131,7 +131,7 @@ export const db = {
 
   // Habit Completions
   async getHabitCompletions() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('habit_completions')
       .select('*');
     if (error) throw error;
@@ -144,7 +144,7 @@ export const db = {
   },
 
   async addHabitCompletion(completion) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('habit_completions')
       .insert({
         id: completion.id,
@@ -164,7 +164,7 @@ export const db = {
   },
 
   async deleteHabitCompletion(habitId, date) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('habit_completions')
       .delete()
       .eq('habit_id', habitId)
@@ -174,7 +174,7 @@ export const db = {
 
   // Todos
   async getTodos() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('todos')
       .select('*')
       .order('todo_order', { ascending: true });
@@ -193,7 +193,7 @@ export const db = {
   },
 
   async addTodo(todo) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('todos')
       .insert({
         id: todo.id,
@@ -232,7 +232,7 @@ export const db = {
     if (updates.isWork !== undefined) updateData.is_work = updates.isWork;
     if (updates.workDate !== undefined) updateData.work_date = updates.workDate || null;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('todos')
       .update(updateData)
       .eq('id', id)
@@ -253,7 +253,7 @@ export const db = {
   },
 
   async deleteTodo(id) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('todos')
       .delete()
       .eq('id', id);
@@ -274,7 +274,7 @@ export const db = {
 
   // Notes
   async getNotes() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('notes')
       .select('*')
       .order('updated_at', { ascending: false });
@@ -289,7 +289,7 @@ export const db = {
   },
 
   async addNote(note) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('notes')
       .insert({
         id: note.id,
@@ -315,7 +315,7 @@ export const db = {
     if (updates.content !== undefined) updateData.content = updates.content;
     if (updates.updatedAt !== undefined) updateData.updated_at = updates.updatedAt;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('notes')
       .update(updateData)
       .eq('id', id)
@@ -332,7 +332,7 @@ export const db = {
   },
 
   async deleteNote(id) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('notes')
       .delete()
       .eq('id', id);
@@ -341,7 +341,7 @@ export const db = {
 
   // Rewards
   async getRewards() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('rewards')
       .select('*')
       .order('created_at', { ascending: false });
@@ -356,7 +356,7 @@ export const db = {
   },
 
   async addReward(reward) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('rewards')
       .insert({
         id: reward.id,
@@ -383,7 +383,7 @@ export const db = {
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.price !== undefined) updateData.price = updates.price;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('rewards')
       .update(updateData)
       .eq('id', id)
@@ -405,7 +405,7 @@ export const db = {
       .delete()
       .eq('reward_id', id);
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('rewards')
       .delete()
       .eq('id', id);
@@ -414,7 +414,7 @@ export const db = {
 
   // Redemptions
   async getRedemptions() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('redemptions')
       .select('*')
       .order('redeemed_at', { ascending: false });
@@ -429,7 +429,7 @@ export const db = {
   },
 
   async addRedemption(redemption) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('redemptions')
       .insert({
         id: redemption.id,
@@ -452,7 +452,7 @@ export const db = {
 
   // Dashboard Modules
   async getDashboardModules() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('dashboard_modules')
       .select('*')
       .order('position', { ascending: true });
@@ -476,7 +476,7 @@ export const db = {
         config: m.config ? JSON.stringify(m.config) : null,
       }));
       
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('dashboard_modules')
         .insert(modulesData);
       if (error) throw error;
@@ -485,7 +485,7 @@ export const db = {
 
   // Settings
   async getSetting(key) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('settings')
       .select('value')
       .eq('key', key)
@@ -495,7 +495,7 @@ export const db = {
   },
 
   async setSetting(key, value) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('settings')
       .upsert({ key, value: String(value) }, { onConflict: 'key' });
     if (error) throw error;
@@ -503,7 +503,7 @@ export const db = {
 
   // Work Notes
   async getWorkNotes() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('work_notes')
       .select('*')
       .order('updated_at', { ascending: false });
@@ -518,7 +518,7 @@ export const db = {
   },
 
   async addWorkNote(note) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('work_notes')
       .insert({
         id: note.id,
@@ -545,7 +545,7 @@ export const db = {
     if (updates.category !== undefined) updateData.category = updates.category;
     if (updates.updatedAt !== undefined) updateData.updated_at = updates.updatedAt;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('work_notes')
       .update(updateData)
       .eq('id', id)
@@ -562,7 +562,7 @@ export const db = {
   },
 
   async deleteWorkNote(id) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('work_notes')
       .delete()
       .eq('id', id);
@@ -613,7 +613,7 @@ export const db = {
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:addEdit:BEFORE_INSERT',message:'Before Supabase insert',data:{insertData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
-    const { data, error } = await supabaseClient
+    const { data, error } = await getSupabase()Client
       .from('edits')
       .insert(insertData)
       .select()
@@ -643,7 +643,7 @@ export const db = {
     if (updates.completed !== undefined) updateData.completed = updates.completed;
     if (updates.completedAt !== undefined) updateData.completed_at = updates.completedAt || null;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('edits')
       .update(updateData)
       .eq('id', id)
@@ -661,7 +661,7 @@ export const db = {
   },
 
   async deleteEdit(id) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('edits')
       .delete()
       .eq('id', id);
@@ -670,7 +670,7 @@ export const db = {
 
   // Lifts
   async getLifts() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lifts')
       .select('*')
       .order('name', { ascending: true });
@@ -686,7 +686,7 @@ export const db = {
   },
 
   async addLift(lift) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lifts')
       .insert({
         id: lift.id,
@@ -716,7 +716,7 @@ export const db = {
     if (updates.oneRepMax !== undefined) updateData.one_rep_max = updates.oneRepMax;
     if (updates.updatedAt !== undefined) updateData.updated_at = updates.updatedAt;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lifts')
       .update(updateData)
       .eq('id', id)
@@ -739,7 +739,7 @@ export const db = {
       .delete()
       .eq('lift_id', id);
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('lifts')
       .delete()
       .eq('id', id);
@@ -748,7 +748,7 @@ export const db = {
 
   // Lift Entries
   async getLiftEntries() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lift_entries')
       .select('*')
       .order('date', { ascending: false });
@@ -765,7 +765,7 @@ export const db = {
   },
 
   async addLiftEntry(entry) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lift_entries')
       .insert({
         id: entry.id,
@@ -797,7 +797,7 @@ export const db = {
     if (updates.date !== undefined) updateData.date = updates.date;
     if (updates.notes !== undefined) updateData.notes = updates.notes || null;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('lift_entries')
       .update(updateData)
       .eq('id', id)
@@ -816,7 +816,7 @@ export const db = {
   },
 
   async deleteLiftEntry(id) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('lift_entries')
       .delete()
       .eq('id', id);
