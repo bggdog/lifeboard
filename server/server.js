@@ -13,16 +13,24 @@ app.use(express.json());
 
 // Add request logging for debugging
 app.use((req, res, next) => {
-  if (process.env.VERCEL === '1') {
-    console.log(`${req.method} ${req.path}`, {
-      body: req.body ? Object.keys(req.body) : 'no body',
-      query: req.query,
-      env: {
-        hasSupabaseUrl: !!process.env.SUPABASE_URL,
-        hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
-      }
-    });
-  }
+  // #region agent log
+  console.log('[EXPRESS MIDDLEWARE] Request', {
+    method: req.method,
+    path: req.path,
+    url: req.url,
+    bodyKeys: req.body ? Object.keys(req.body) : 'no body',
+    query: req.query,
+    env: {
+      vercel: process.env.VERCEL,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
+    },
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run2',
+    hypothesisId: 'A'
+  });
+  // #endregion
   next();
 });
 

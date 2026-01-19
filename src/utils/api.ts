@@ -4,19 +4,33 @@
 const getApiBase = () => {
   // If VITE_API_URL is explicitly set, use it
   if ((import.meta as any).env?.VITE_API_URL) {
-    return (import.meta as any).env.VITE_API_URL;
+    const base = (import.meta as any).env.VITE_API_URL;
+    console.log('[API] Using VITE_API_URL:', base);
+    return base;
   }
   
   // In development mode, use localhost
   if ((import.meta as any).env?.DEV) {
-    return 'http://localhost:3001/api';
+    const base = 'http://localhost:3001/api';
+    console.log('[API] Using DEV localhost:', base);
+    return base;
   }
   
   // In production, use relative URL (works with Vercel serverless functions)
-  return '/api';
+  const base = '/api';
+  console.log('[API] Using production relative URL:', base);
+  return base;
 };
 
 const API_BASE = getApiBase();
+console.log('[API] API_BASE determined:', API_BASE, {
+  isDev: !!(import.meta as any).env?.DEV,
+  hasViteApiUrl: !!(import.meta as any).env?.VITE_API_URL,
+  timestamp: Date.now(),
+  sessionId: 'debug-session',
+  runId: 'run2',
+  hypothesisId: 'C'
+});
 
 export const api = {
   async getState() {

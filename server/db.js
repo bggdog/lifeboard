@@ -15,19 +15,71 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 let supabase = null;
 
 function getSupabase() {
+  // #region agent log
+  console.log('[getSupabase] Called', {
+    hasSupabase: !!supabase,
+    hasUrl: !!process.env.SUPABASE_URL,
+    hasKey: !!process.env.SUPABASE_ANON_KEY,
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run2',
+    hypothesisId: 'B'
+  });
+  // #endregion
   if (!supabase) {
     // Check environment variables - they should be available in Vercel
     const url = process.env.SUPABASE_URL || supabaseUrl;
     const key = process.env.SUPABASE_ANON_KEY || supabaseKey;
     
+    // #region agent log
+    console.log('[getSupabase] Initializing', {
+      url: url ? 'SET' : 'MISSING',
+      key: key ? 'SET' : 'MISSING',
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run2',
+      hypothesisId: 'B'
+    });
+    // #endregion
+    
     if (!url || !key) {
       const errorMsg = 'Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel environment variables.';
-      console.error(errorMsg);
-      console.error('SUPABASE_URL:', url ? 'SET' : 'MISSING');
-      console.error('SUPABASE_ANON_KEY:', key ? 'SET' : 'MISSING');
+      // #region agent log
+      console.error('[getSupabase] ERROR', {
+        error: errorMsg,
+        url: url ? 'SET' : 'MISSING',
+        key: key ? 'SET' : 'MISSING',
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run2',
+        hypothesisId: 'B'
+      });
+      // #endregion
       throw new Error(errorMsg);
     }
-    supabase = createClient(url, key);
+    try {
+      supabase = createClient(url, key);
+      // #region agent log
+      console.log('[getSupabase] Client created', {
+        success: true,
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run2',
+        hypothesisId: 'B'
+      });
+      // #endregion
+    } catch (createError: any) {
+      // #region agent log
+      console.error('[getSupabase] Client creation failed', {
+        error: createError?.message,
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run2',
+        hypothesisId: 'B'
+      });
+      // #endregion
+      throw createError;
+    }
   }
   return supabase;
 }
