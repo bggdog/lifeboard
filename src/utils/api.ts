@@ -175,6 +175,16 @@ export const api = {
       tokenBalance -= r.price;
     });
 
+    // Get journal prompts setting
+    const { data: settingsData } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'journalPromptsEnabled')
+      .eq('user_id', userId)
+      .single();
+    
+    const journalPromptsEnabled = settingsData?.value === 'true';
+
     return {
       habits,
       habitCompletions,
@@ -188,6 +198,8 @@ export const api = {
       redemptions,
       dashboardModules,
       tokenBalance,
+      journalPromptsEnabled,
+      loading: false,
     };
   },
 

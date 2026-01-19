@@ -1,8 +1,8 @@
 // Direct Supabase client for frontend
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://uujtatmznjwwuxzjyhfa.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_oTFWMsxwP8n_a5RVNoqvzA_WdxqAiub';
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || 'https://uujtatmznjwwuxzjyhfa.supabase.co';
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || 'sb_publishable_oTFWMsxwP8n_a5RVNoqvzA_WdxqAiub';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
