@@ -1,7 +1,8 @@
 import { useApp } from '../context/AppContext';
-import { Settings as SettingsIcon, Briefcase, Dumbbell } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, Briefcase, Dumbbell, LogOut } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import TokenBalanceModule from './modules/TokenBalanceModule';
 import HabitsModule from './modules/HabitsModule';
 import TodosModule from './modules/TodosModule';
@@ -10,24 +11,14 @@ import RewardsShortcutModule from './modules/RewardsShortcutModule';
 import DashboardSettings from './DashboardSettings';
 
 const Dashboard = () => {
-  const { state, refreshState } = useApp();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const { state } = useApp();
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkApi = async () => {
-      try {
-        await fetch('/api/health');
-        setApiError(null);
-      } catch (err) {
-        setApiError('Cannot connect to backend server. Make sure it\'s running on port 3001.');
-      }
-    };
-    checkApi();
-    const interval = setInterval(checkApi, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   if (state.loading) {
     return (
@@ -89,28 +80,20 @@ const Dashboard = () => {
               >
                 <SettingsIcon className="w-5 h-5 text-neutral-600" />
               </button>
+              <button
+                onClick={handleSignOut}
+                className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 flex items-center gap-2"
+                title="Sign Out"
+              >
+                <LogOut className="w-5 h-5 text-neutral-600" />
+                <span className="text-sm text-neutral-600 hidden sm:inline">Sign Out</span>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {apiError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-card text-red-800">
-            <p className="font-medium">⚠️ Connection Error</p>
-            <p className="text-sm mt-1">{apiError}</p>
-            <button
-              onClick={() => {
-                setApiError(null);
-                refreshState();
-              }}
-              className="mt-3 btn-primary text-sm"
-            >
-              Retry Connection
-            </button>
-          </div>
-        )}
-
         <div className="space-y-6">
           {sortedModules.map((module, index) => (
             <div 
