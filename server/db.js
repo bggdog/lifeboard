@@ -571,7 +571,7 @@ export const db = {
 
   // Edits
   async getEdits() {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('edits')
       .select('*')
       .order('created_at', { ascending: false });
