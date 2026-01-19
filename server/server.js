@@ -96,9 +96,9 @@ app.get('/api/state', async (req, res) => {
       dashboardModules: dashboardModules.map(m => ({ ...m, config: m.config ? JSON.parse(m.config) : undefined })),
       journalPromptsEnabled: journalPromptsEnabled === 'true',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching state:', error);
-    res.status(500).json({ error: 'Failed to fetch state', details: error.message });
+    res.status(500).json({ error: 'Failed to fetch state', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -107,9 +107,9 @@ app.post('/api/habits', async (req, res) => {
   try {
     await db.addHabit(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating habit:', error);
-    res.status(500).json({ error: 'Failed to create habit', details: error.message });
+    res.status(500).json({ error: 'Failed to create habit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -117,9 +117,9 @@ app.put('/api/habits/:id', async (req, res) => {
   try {
     await db.updateHabit(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating habit:', error);
-    res.status(500).json({ error: 'Failed to update habit', details: error.message });
+    res.status(500).json({ error: 'Failed to update habit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -127,9 +127,9 @@ app.delete('/api/habits/:id', async (req, res) => {
   try {
     await db.deleteHabit(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting habit:', error);
-    res.status(500).json({ error: 'Failed to delete habit', details: error.message });
+    res.status(500).json({ error: 'Failed to delete habit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -138,9 +138,9 @@ app.post('/api/habit-completions', async (req, res) => {
   try {
     await db.addHabitCompletion(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating completion:', error);
-    res.status(500).json({ error: 'Failed to create completion', details: error.message });
+    res.status(500).json({ error: 'Failed to create completion', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -148,9 +148,9 @@ app.delete('/api/habit-completions/:habitId/:date', async (req, res) => {
   try {
     await db.deleteHabitCompletion(req.params.habitId, req.params.date);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting completion:', error);
-    res.status(500).json({ error: 'Failed to delete completion', details: error.message });
+    res.status(500).json({ error: 'Failed to delete completion', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -161,7 +161,7 @@ app.post('/api/todos', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error: any) {
     console.error('Error creating todo:', error);
-    res.status(500).json({ error: 'Failed to create todo', details: error.message });
+    res.status(500).json({ error: 'Failed to create todo', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -169,9 +169,9 @@ app.put('/api/todos/:id', async (req, res) => {
   try {
     await db.updateTodo(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating todo:', error);
-    res.status(500).json({ error: 'Failed to update todo', details: error.message });
+    res.status(500).json({ error: 'Failed to update todo', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -179,9 +179,9 @@ app.put('/api/todos/reorder', async (req, res) => {
   try {
     await db.reorderTodos(req.body.todos);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error reordering todos:', error);
-    res.status(500).json({ error: 'Failed to reorder todos', details: error.message });
+    res.status(500).json({ error: 'Failed to reorder todos', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -189,9 +189,9 @@ app.delete('/api/todos/:id', async (req, res) => {
   try {
     await db.deleteTodo(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting todo:', error);
-    res.status(500).json({ error: 'Failed to delete todo', details: error.message });
+    res.status(500).json({ error: 'Failed to delete todo', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -200,9 +200,9 @@ app.post('/api/notes', async (req, res) => {
   try {
     await db.addNote(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating note:', error);
-    res.status(500).json({ error: 'Failed to create note', details: error.message });
+    res.status(500).json({ error: 'Failed to create note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -210,9 +210,9 @@ app.put('/api/notes/:id', async (req, res) => {
   try {
     await db.updateNote(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating note:', error);
-    res.status(500).json({ error: 'Failed to update note', details: error.message });
+    res.status(500).json({ error: 'Failed to update note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -220,9 +220,9 @@ app.delete('/api/notes/:id', async (req, res) => {
   try {
     await db.deleteNote(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting note:', error);
-    res.status(500).json({ error: 'Failed to delete note', details: error.message });
+    res.status(500).json({ error: 'Failed to delete note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -231,9 +231,9 @@ app.post('/api/work-notes', async (req, res) => {
   try {
     await db.addWorkNote(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating work note:', error);
-    res.status(500).json({ error: 'Failed to create work note', details: error.message });
+    res.status(500).json({ error: 'Failed to create work note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -241,9 +241,9 @@ app.put('/api/work-notes/:id', async (req, res) => {
   try {
     await db.updateWorkNote(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating work note:', error);
-    res.status(500).json({ error: 'Failed to update work note', details: error.message });
+    res.status(500).json({ error: 'Failed to update work note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -251,9 +251,9 @@ app.delete('/api/work-notes/:id', async (req, res) => {
   try {
     await db.deleteWorkNote(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting work note:', error);
-    res.status(500).json({ error: 'Failed to delete work note', details: error.message });
+    res.status(500).json({ error: 'Failed to delete work note', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -262,9 +262,9 @@ app.post('/api/edits', async (req, res) => {
   try {
     await db.addEdit(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating edit:', error);
-    res.status(500).json({ error: 'Failed to create edit', details: error.message });
+    res.status(500).json({ error: 'Failed to create edit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -272,9 +272,9 @@ app.put('/api/edits/:id', async (req, res) => {
   try {
     await db.updateEdit(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating edit:', error);
-    res.status(500).json({ error: 'Failed to update edit', details: error.message });
+    res.status(500).json({ error: 'Failed to update edit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -282,9 +282,9 @@ app.delete('/api/edits/:id', async (req, res) => {
   try {
     await db.deleteEdit(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting edit:', error);
-    res.status(500).json({ error: 'Failed to delete edit', details: error.message });
+    res.status(500).json({ error: 'Failed to delete edit', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -293,9 +293,9 @@ app.post('/api/lifts', async (req, res) => {
   try {
     await db.addLift(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating lift:', error);
-    res.status(500).json({ error: 'Failed to create lift', details: error.message });
+    res.status(500).json({ error: 'Failed to create lift', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -303,9 +303,9 @@ app.put('/api/lifts/:id', async (req, res) => {
   try {
     await db.updateLift(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating lift:', error);
-    res.status(500).json({ error: 'Failed to update lift', details: error.message });
+    res.status(500).json({ error: 'Failed to update lift', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -313,9 +313,9 @@ app.delete('/api/lifts/:id', async (req, res) => {
   try {
     await db.deleteLift(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting lift:', error);
-    res.status(500).json({ error: 'Failed to delete lift', details: error.message });
+    res.status(500).json({ error: 'Failed to delete lift', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -324,9 +324,9 @@ app.post('/api/lift-entries', async (req, res) => {
   try {
     await db.addLiftEntry(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating lift entry:', error);
-    res.status(500).json({ error: 'Failed to create lift entry', details: error.message });
+    res.status(500).json({ error: 'Failed to create lift entry', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -334,9 +334,9 @@ app.put('/api/lift-entries/:id', async (req, res) => {
   try {
     await db.updateLiftEntry(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating lift entry:', error);
-    res.status(500).json({ error: 'Failed to update lift entry', details: error.message });
+    res.status(500).json({ error: 'Failed to update lift entry', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -344,9 +344,9 @@ app.delete('/api/lift-entries/:id', async (req, res) => {
   try {
     await db.deleteLiftEntry(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting lift entry:', error);
-    res.status(500).json({ error: 'Failed to delete lift entry', details: error.message });
+    res.status(500).json({ error: 'Failed to delete lift entry', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -355,9 +355,9 @@ app.post('/api/rewards', async (req, res) => {
   try {
     await db.addReward(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating reward:', error);
-    res.status(500).json({ error: 'Failed to create reward', details: error.message });
+    res.status(500).json({ error: 'Failed to create reward', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -365,9 +365,9 @@ app.put('/api/rewards/:id', async (req, res) => {
   try {
     await db.updateReward(req.params.id, req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating reward:', error);
-    res.status(500).json({ error: 'Failed to update reward', details: error.message });
+    res.status(500).json({ error: 'Failed to update reward', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -375,9 +375,9 @@ app.delete('/api/rewards/:id', async (req, res) => {
   try {
     await db.deleteReward(req.params.id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting reward:', error);
-    res.status(500).json({ error: 'Failed to delete reward', details: error.message });
+    res.status(500).json({ error: 'Failed to delete reward', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -386,9 +386,9 @@ app.post('/api/redemptions', async (req, res) => {
   try {
     await db.addRedemption(req.body);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating redemption:', error);
-    res.status(500).json({ error: 'Failed to create redemption', details: error.message });
+    res.status(500).json({ error: 'Failed to create redemption', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -403,9 +403,9 @@ app.put('/api/dashboard-modules', async (req, res) => {
     }));
     await db.setDashboardModules(modulesWithStringConfig);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating dashboard modules:', error);
-    res.status(500).json({ error: 'Failed to update dashboard modules', details: error.message });
+    res.status(500).json({ error: 'Failed to update dashboard modules', details: error?.message || error?.details || String(error) });
   }
 });
 
@@ -415,9 +415,9 @@ app.put('/api/settings/journal-prompts', async (req, res) => {
     const { enabled } = req.body;
     await db.setSetting('journalPromptsEnabled', enabled);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating setting:', error);
-    res.status(500).json({ error: 'Failed to update setting', details: error.message });
+    res.status(500).json({ error: 'Failed to update setting', details: error?.message || error?.details || String(error) });
   }
 });
 

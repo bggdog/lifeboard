@@ -46,7 +46,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(habit),
     });
-    if (!response.ok) throw new Error('Failed to create habit');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create habit';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -56,13 +66,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(habit),
     });
-    if (!response.ok) throw new Error('Failed to update habit');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update habit';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteHabit(id: string) {
     const response = await fetch(`${API_BASE}/habits/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete habit');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete habit';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -72,7 +102,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(completion),
     });
-    if (!response.ok) throw new Error('Failed to create completion');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create completion';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -80,7 +120,17 @@ export const api = {
     const response = await fetch(`${API_BASE}/habit-completions/${habitId}/${date}`, {
       method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Failed to delete completion');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete completion';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -110,7 +160,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(todo),
     });
-    if (!response.ok) throw new Error('Failed to update todo');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update todo';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -120,13 +180,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ todos }),
     });
-    if (!response.ok) throw new Error('Failed to reorder todos');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to reorder todos';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteTodo(id: string) {
     const response = await fetch(`${API_BASE}/todos/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete todo');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete todo';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -136,7 +216,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(note),
     });
-    if (!response.ok) throw new Error('Failed to create note');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create note';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -146,13 +236,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(note),
     });
-    if (!response.ok) throw new Error('Failed to update note');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update note';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteNote(id: string) {
     const response = await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete note');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete note';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -184,7 +294,17 @@ export const api = {
 
   async deleteWorkNote(id: string) {
     const response = await fetch(`${API_BASE}/work-notes/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete work note');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete work note';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -214,13 +334,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(edit),
     });
-    if (!response.ok) throw new Error('Failed to update edit');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update edit';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteEdit(id: string) {
     const response = await fetch(`${API_BASE}/edits/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete edit');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete edit';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -250,13 +390,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(lift),
     });
-    if (!response.ok) throw new Error('Failed to update lift');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update lift';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteLift(id: string) {
     const response = await fetch(`${API_BASE}/lifts/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete lift');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete lift';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -266,7 +426,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
-    if (!response.ok) throw new Error('Failed to create lift entry');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create lift entry';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -276,13 +446,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
-    if (!response.ok) throw new Error('Failed to update lift entry');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update lift entry';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteLiftEntry(id: string) {
     const response = await fetch(`${API_BASE}/lift-entries/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete lift entry');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete lift entry';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -292,7 +482,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reward),
     });
-    if (!response.ok) throw new Error('Failed to create reward');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create reward';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -302,13 +502,33 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reward),
     });
-    if (!response.ok) throw new Error('Failed to update reward');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update reward';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
   async deleteReward(id: string) {
     const response = await fetch(`${API_BASE}/rewards/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete reward');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to delete reward';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -318,7 +538,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(redemption),
     });
-    if (!response.ok) throw new Error('Failed to create redemption');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to create redemption';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 
@@ -346,7 +576,17 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled }),
     });
-    if (!response.ok) throw new Error('Failed to update setting');
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = 'Failed to update setting';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.details || errorJson.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 };
