@@ -13,17 +13,22 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 // #region agent log
-console.log('[db.js] Module loaded', {
-  hasSupabaseUrl: !!supabaseUrl,
-  hasSupabaseKey: !!supabaseKey,
-  hasProcessEnvUrl: !!process.env.SUPABASE_URL,
-  hasProcessEnvKey: !!process.env.SUPABASE_ANON_KEY,
-  vercel: process.env.VERCEL,
-  timestamp: Date.now(),
-  sessionId: 'debug-session',
-  runId: 'run2',
-  hypothesisId: 'B'
-});
+try {
+  console.log('[db.js] Module loaded', {
+    hasSupabaseUrl: !!supabaseUrl,
+    hasSupabaseKey: !!supabaseKey,
+    hasProcessEnvUrl: !!process.env.SUPABASE_URL,
+    hasProcessEnvKey: !!process.env.SUPABASE_ANON_KEY,
+    vercel: process.env.VERCEL,
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run2',
+    hypothesisId: 'B'
+  });
+} catch (logError) {
+  // Don't fail module load if logging fails
+  console.error('[db.js] Logging error (non-fatal):', logError);
+}
 // #endregion
 
 // Initialize Supabase client

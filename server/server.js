@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import { db } from './db.js';
 
+console.log('[server.js] Module loading - db imported:', {
+  hasDb: !!db,
+  dbType: typeof db,
+  timestamp: Date.now()
+});
+
 // Load environment variables (only for local development, Vercel provides them automatically)
 // Note: dotenv is handled in db.js for local development
 
@@ -63,13 +69,24 @@ if (process.env.VERCEL !== '1') {
   initializeDefaults();
 }
 
-// Health check endpoint
-app.get('/api/health', async (req, res) => {
-  if (!initialized && process.env.VERCEL === '1') {
-    await initializeDefaults();
-    initialized = true;
+// Health check endpoint - simplest possible, no DB access
+app.get('/api/health', (req, res) => {
+  console.log('[HEALTH] Health check called');
+  try {
+    res.json({ 
+      status: 'ok', 
+      message: 'Backend server is running', 
+      database: 'Supabase',
+      hasDb: !!db,
+      timestamp: Date.now()
+    });
+  } catch (error: any) {
+    console.error('[HEALTH] Error in health check:', error);
+    res.status(500).json({ 
+      error: 'Health check failed',
+      details: error?.message 
+    });
   }
-  res.json({ status: 'ok', message: 'Backend server is running', database: 'Supabase' });
 });
 
 // Get all state
