@@ -1,68 +1,47 @@
 // Vercel serverless function - catches all API routes
-// This allows Express routes to work as Vercel serverless functions
+// Minimal handler to test if basic setup works
 
-// Note: Import path needs to be relative to this file
-// Use dynamic import to handle potential module loading errors
-let serverPromise;
-
-async function getServer() {
-  if (!serverPromise) {
-    serverPromise = import('../server/server.js').then(module => {
-      console.log('[VERCEL HANDLER] Server imported successfully');
-      return module.default || module;
-    }).catch(err => {
-      console.error('[VERCEL HANDLER] Failed to import server:', err);
-      throw err;
-    });
-  }
-  return serverPromise;
-}
-
-// Export the Express app as a serverless function
-// Vercel will call this handler for all /api/* routes
 export default async (req, res) => {
-  // #region agent log
-  console.log('[VERCEL HANDLER] Request received', {
+  console.log('[VERCEL HANDLER] Basic handler called', {
     method: req.method,
     url: req.url,
-    path: req.path,
-    headers: Object.keys(req.headers || {}),
-    hasBody: !!req.body,
-    timestamp: Date.now(),
-    sessionId: 'debug-session',
-    runId: 'run2',
-    hypothesisId: 'A'
+    timestamp: Date.now()
   });
-  // #endregion
   
+  // Test if we can import the server
   try {
-    const server = await getServer();
-    // #region agent log
-    console.log('[VERCEL HANDLER] Server loaded, calling handler', {
-      hasServer: !!server,
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run2',
-      hypothesisId: 'A'
+    console.log('[VERCEL HANDLER] Attempting to import server...');
+    const serverModule = await import('../server/server.js');
+    console.log('[VERCEL HANDLER] Server module imported', {
+      hasDefault: !!serverModule.default,
+      keys: Object.keys(serverModule)
     });
-    // #endregion
-    return server(req, res);
-  } catch (error: any) {
-    // #region agent log
-    console.error('[VERCEL HANDLER] Error', {
-      error: error?.message,
-      stack: error?.stack?.substring(0, 500),
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run2',
-      hypothesisId: 'A'
+    
+    const server = serverModule.default || serverModule;
+    console.log('[VERCEL HANDLER] Server obtained', {
+      type: typeof server,
+      isFunction: typeof server === 'function'
     });
-    // #endregion
-    if (!res.headersSent) {
-      res.status(500).json({ 
-        error: 'A server error has occurred', 
-        details: error?.message || String(error) 
+    
+    if (typeof server === 'function') {
+      return server(req, res);
+    } else {
+      return res.status(500).json({ 
+        error: 'Server is not a function',
+        details: `Server type: ${typeof server}`
       });
     }
+  } catch (importError: any) {
+    console.error('[VERCEL HANDLER] Import error:', {
+      message: importError?.message,
+      stack: importError?.stack?.substring(0, 1000),
+      name: importError?.name
+    });
+    
+    return res.status(500).json({ 
+      error: 'Failed to import server',
+      details: importError?.message || String(importError),
+      stack: importError?.stack?.substring(0, 500)
+    });
   }
 };
