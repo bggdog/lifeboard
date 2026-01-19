@@ -291,10 +291,34 @@ export const api = {
 
   async updateTodo(id: string, todo: Partial<Todo>) {
     const userId = await getUserId();
-    const data = toSnakeCase(todo);
-    const { data: result, error } = await supabase.from('todos').update(data).eq('id', id).eq('user_id', userId).select().single();
+    const updateData: any = {};
+    if (todo.completed !== undefined) updateData.completed = todo.completed;
+    if (todo.completedAt !== undefined) updateData.completed_at = todo.completedAt;
+    if (todo.text !== undefined) updateData.text = todo.text;
+    if (todo.tokenReward !== undefined) updateData.token_reward = todo.tokenReward;
+    if (todo.order !== undefined) updateData.todo_order = todo.order;
+    if (todo.isWork !== undefined) updateData.is_work = todo.isWork;
+    if (todo.workDate !== undefined) updateData.work_date = todo.workDate;
+    
+    const { data: result, error } = await supabase
+      .from('todos')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
     if (error) throw error;
-    return toCamelCase(result) as Todo;
+    return {
+      id: result.id,
+      text: result.text,
+      completed: result.completed,
+      tokenReward: result.token_reward,
+      createdAt: result.created_at,
+      completedAt: result.completed_at,
+      order: result.todo_order,
+      isWork: result.is_work,
+      workDate: result.work_date,
+    } as Todo;
   },
 
   async reorderTodos(todos: Todo[]) {

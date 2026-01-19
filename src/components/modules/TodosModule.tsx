@@ -41,17 +41,24 @@ const TodosModule = () => {
 
   const handleToggleComplete = async (todo: Todo) => {
     const wasCompleted = todo.completed;
-    await updateTodo({
-      ...todo,
-      completed: !todo.completed,
-      completedAt: todo.completed ? undefined : new Date().toISOString(),
-    });
+    const newCompleted = !todo.completed;
+    
+    try {
+      await updateTodo({
+        ...todo,
+        completed: newCompleted,
+        completedAt: newCompleted ? new Date().toISOString() : null,
+      });
 
-    // Show celebration if completing (not uncompleting)
-    if (!wasCompleted) {
-      setAnimatingTodoId(todo.id);
-      setShowConfetti(true);
-      setTimeout(() => setAnimatingTodoId(null), 300);
+      // Show celebration if completing (not uncompleting)
+      if (!wasCompleted) {
+        setAnimatingTodoId(todo.id);
+        setShowConfetti(true);
+        setTimeout(() => setAnimatingTodoId(null), 300);
+      }
+    } catch (error: any) {
+      console.error('Error toggling todo:', error);
+      alert(`Failed to update todo: ${error?.message || 'Unknown error'}`);
     }
   };
 
