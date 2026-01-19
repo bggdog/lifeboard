@@ -16,10 +16,18 @@ let supabase = null;
 
 function getSupabase() {
   if (!supabase) {
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel environment variables.');
+    // Check environment variables - they should be available in Vercel
+    const url = process.env.SUPABASE_URL || supabaseUrl;
+    const key = process.env.SUPABASE_ANON_KEY || supabaseKey;
+    
+    if (!url || !key) {
+      const errorMsg = 'Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel environment variables.';
+      console.error(errorMsg);
+      console.error('SUPABASE_URL:', url ? 'SET' : 'MISSING');
+      console.error('SUPABASE_ANON_KEY:', key ? 'SET' : 'MISSING');
+      throw new Error(errorMsg);
     }
-    supabase = createClient(supabaseUrl, supabaseKey);
+    supabase = createClient(url, key);
   }
   return supabase;
 }
