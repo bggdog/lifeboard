@@ -71,22 +71,14 @@ if (process.env.VERCEL !== '1') {
 
 // Health check endpoint - simplest possible, no DB access
 app.get('/api/health', (req, res) => {
-  console.log('[HEALTH] Health check called');
-  try {
-    res.json({ 
-      status: 'ok', 
-      message: 'Backend server is running', 
-      database: 'Supabase',
-      hasDb: !!db,
-      timestamp: Date.now()
-    });
-  } catch (error: any) {
-    console.error('[HEALTH] Error in health check:', error);
-    res.status(500).json({ 
-      error: 'Health check failed',
-      details: error?.message 
-    });
-  }
+  console.log('[HEALTH] Health check endpoint hit');
+  res.json({ 
+    status: 'ok', 
+    message: 'Backend server is running', 
+    database: 'Supabase',
+    hasDb: !!db,
+    timestamp: Date.now()
+  });
 });
 
 // Get all state
@@ -487,7 +479,25 @@ app.put('/api/settings/journal-prompts', async (req, res) => {
 });
 
 // Export app for Vercel serverless functions
-export default app;
+// Wrap in error handler to catch any initialization errors
+const wrappedApp = (req, res, next) => {
+  try {
+    return app(req, res, next);
+  } catch (error: any) {
+    console.error('[EXPRESS APP] Unhandled error:', {
+      message: error?.message,
+      stack: error?.stack?.substring(0, 500)
+    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Internal server error',
+        details: error?.message
+      });
+    }
+  }
+};
+
+export default wrappedApp;
 
 // Only start server if not in Vercel serverless environment
 if (process.env.VERCEL !== '1') {
