@@ -34,6 +34,7 @@ export const db = {
       schedule: h.schedule,
       createdAt: h.created_at,
       archived: h.archived || false,
+      emoji: h.emoji || null,
     }));
   },
 
@@ -49,6 +50,7 @@ export const db = {
         schedule: habit.schedule,
         created_at: habit.createdAt,
         archived: habit.archived || false,
+        emoji: habit.emoji || null,
       })
       .select()
       .single();
@@ -62,6 +64,7 @@ export const db = {
       schedule: data.schedule,
       createdAt: data.created_at,
       archived: data.archived,
+      emoji: data.emoji || null,
     };
   },
 
@@ -73,6 +76,7 @@ export const db = {
     if (updates.category !== undefined) updateData.category = updates.category;
     if (updates.schedule !== undefined) updateData.schedule = updates.schedule;
     if (updates.archived !== undefined) updateData.archived = updates.archived;
+    if (updates.emoji !== undefined) updateData.emoji = updates.emoji || null;
     
     const { data, error } = await supabase
       .from('habits')
@@ -90,6 +94,7 @@ export const db = {
       schedule: data.schedule,
       createdAt: data.created_at,
       archived: data.archived,
+      emoji: data.emoji || null,
     };
   },
 

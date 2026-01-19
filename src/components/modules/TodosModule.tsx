@@ -3,12 +3,15 @@ import { useApp } from '../../context/AppContext';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import { Todo } from '../../types';
+import ConfettiEffect from '../ConfettiEffect';
 
 const TodosModule = () => {
   const { state, addTodo, updateTodo, deleteTodo, reorderTodos } = useApp();
   const [newTodoText, setNewTodoText] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTodoTokens, setNewTodoTokens] = useState<number | undefined>(undefined);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [animatingTodoId, setAnimatingTodoId] = useState<string | null>(null);
 
   const activeTodos = state.todos.filter(t => !t.completed);
   const sortedTodos = [...activeTodos].sort((a, b) => a.order - b.order);
@@ -37,11 +40,19 @@ const TodosModule = () => {
   };
 
   const handleToggleComplete = async (todo: Todo) => {
+    const wasCompleted = todo.completed;
     await updateTodo({
       ...todo,
       completed: !todo.completed,
       completedAt: todo.completed ? undefined : new Date().toISOString(),
     });
+
+    // Show celebration if completing (not uncompleting)
+    if (!wasCompleted) {
+      setAnimatingTodoId(todo.id);
+      setShowConfetti(true);
+      setTimeout(() => setAnimatingTodoId(null), 300);
+    }
   };
 
   const handleDelete = async (todoId: string) => {
@@ -65,18 +76,19 @@ const TodosModule = () => {
 
   return (
     <div>
+      <ConfettiEffect trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-neutral-900">To-Dos</h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="p-2 rounded-button hover:bg-neutral-100 transition-colors"
+          className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 hover:rotate-90"
         >
-          <Plus className="w-5 h-5 text-neutral-600" />
+          <Plus className="w-5 h-5 text-neutral-600 transition-transform" />
         </button>
       </div>
 
       {showAddForm && (
-        <div className="mb-4 p-4 bg-neutral-50 rounded-card space-y-2">
+        <div className="mb-4 p-4 bg-neutral-50 rounded-card space-y-2 animate-slide-in">
           <input
             type="text"
             placeholder="What needs to be done?"
@@ -143,7 +155,7 @@ const TodosModule = () => {
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`flex items-center gap-3 p-3 rounded-button transition-all ${
+                        className={`flex items-center gap-3 p-3 rounded-button transition-all duration-200 animate-fade-in ${
                           snapshot.isDragging
                             ? 'bg-white shadow-card'
                             : 'bg-neutral-50 hover:bg-neutral-100'
@@ -154,9 +166,13 @@ const TodosModule = () => {
                         </div>
                         <button
                           onClick={() => handleToggleComplete(todo)}
-                          className="flex-shrink-0 w-5 h-5 rounded-md border-2 border-neutral-300 hover:border-accent transition-colors flex items-center justify-center"
+                          className={`flex-shrink-0 w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
+                            todo.completed
+                              ? 'bg-accent border-accent text-white scale-110'
+                              : 'border-neutral-300 hover:border-accent hover:scale-105'
+                          } ${animatingTodoId === todo.id ? 'animate-bounce-subtle' : ''}`}
                         >
-                          {todo.completed && <Check className="w-3 h-3 text-accent" />}
+                          {todo.completed && <Check className="w-3 h-3 text-white animate-fade-in" />}
                         </button>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-neutral-900">{todo.text}</div>
@@ -168,7 +184,7 @@ const TodosModule = () => {
                         </div>
                         <button
                           onClick={() => handleDelete(todo.id)}
-                          className="p-1.5 rounded-button hover:bg-red-50 transition-colors"
+                          className="p-1.5 rounded-button hover:bg-red-50 transition-all duration-200 hover:animate-shake"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>

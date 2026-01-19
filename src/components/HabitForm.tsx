@@ -13,6 +13,15 @@ const HabitForm = ({ habit, onSave, onCancel }: HabitFormProps) => {
   const [tokenReward, setTokenReward] = useState(habit?.tokenReward || 5);
   const [category, setCategory] = useState(habit?.category || '');
   const [schedule, setSchedule] = useState(habit?.schedule || 'daily');
+  const [emoji, setEmoji] = useState(habit?.emoji || '⭐');
+
+  // Popular emoji options for habits
+  const emojiOptions = [
+    '⭐', '💪', '🧘', '📚', '🏃', '💧', '🍎', '😴',
+    '🎯', '🔥', '✨', '🌱', '🎨', '🎵', '📝', '🧠',
+    '💚', '🌞', '🌙', '☕', '🥗', '🏋️', '🚶', '🧘‍♀️',
+    '📖', '✍️', '🎬', '🎮', '🏠', '💼', '🎪', '🌈'
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +36,7 @@ const HabitForm = ({ habit, onSave, onCancel }: HabitFormProps) => {
       schedule,
       createdAt: habit?.createdAt || new Date().toISOString(),
       archived: habit?.archived || false,
+      emoji: emoji || '⭐',
     };
 
     onSave(habitData);
@@ -34,6 +44,35 @@ const HabitForm = ({ habit, onSave, onCancel }: HabitFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium text-neutral-700 mb-2">
+          Emoji
+        </label>
+        <div className="grid grid-cols-8 gap-2 mb-2">
+          {emojiOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setEmoji(option)}
+              className={`text-2xl p-2 rounded-button transition-all duration-200 ${
+                emoji === option
+                  ? 'bg-accent text-white scale-110 ring-2 ring-accent'
+                  : 'bg-neutral-100 hover:bg-neutral-200 hover:scale-105'
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          placeholder="Or type emoji"
+          value={emoji}
+          onChange={(e) => setEmoji(e.target.value)}
+          className="input text-center text-2xl"
+          maxLength={2}
+        />
+      </div>
       <input
         type="text"
         placeholder="Habit name"

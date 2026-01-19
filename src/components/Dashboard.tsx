@@ -31,10 +31,10 @@ const Dashboard = () => {
 
   if (state.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center animate-fade-in">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading your dashboard...</p>
+          <p className="text-neutral-600 animate-pulse-subtle">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -60,7 +60,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen animate-fade-in">
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -68,23 +68,23 @@ const Dashboard = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate('/work')}
-                className="p-2 rounded-button hover:bg-neutral-100 transition-colors flex items-center gap-2"
+                className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 hover:scale-105 flex items-center gap-2"
                 title="Work Notes"
               >
-                <Briefcase className="w-5 h-5 text-neutral-600" />
+                <Briefcase className="w-5 h-5 text-neutral-600 transition-transform duration-200 hover:rotate-12" />
                 <span className="text-sm text-neutral-600 hidden sm:inline">Work Notes</span>
               </button>
               <button
                 onClick={() => navigate('/gym')}
-                className="p-2 rounded-button hover:bg-neutral-100 transition-colors flex items-center gap-2"
+                className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 hover:scale-105 flex items-center gap-2"
                 title="Gym Notes"
               >
-                <Dumbbell className="w-5 h-5 text-neutral-600" />
+                <Dumbbell className="w-5 h-5 text-neutral-600 transition-transform duration-200 hover:rotate-12" />
                 <span className="text-sm text-neutral-600 hidden sm:inline">Gym Notes</span>
               </button>
               <button
                 onClick={() => setShowSettings(true)}
-                className="p-2 rounded-button hover:bg-neutral-100 transition-colors"
+                className="p-2 rounded-button hover:bg-neutral-100 transition-all duration-200 hover:rotate-90"
                 aria-label="Dashboard settings"
               >
                 <SettingsIcon className="w-5 h-5 text-neutral-600" />
@@ -112,8 +112,15 @@ const Dashboard = () => {
         )}
 
         <div className="space-y-6">
-          {sortedModules.map((module) => (
-            <div key={module.id} className="card p-6">
+          {sortedModules.map((module, index) => (
+            <div 
+              key={module.id} 
+              className="card p-6 animate-fade-in-up"
+              style={{ 
+                animationDelay: `${index * 0.1}s`,
+                opacity: 0
+              }}
+            >
               {renderModule(module)}
             </div>
           ))}

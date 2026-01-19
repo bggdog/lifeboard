@@ -2,6 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes drawCheck {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 @layer base {
   body {
     @apply text-neutral-800 antialiased;
@@ -12,28 +127,105 @@
     background-attachment: fixed;
     min-height: 100vh;
   }
+
+  /* Respect user preferences for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
   .card {
     @apply bg-white rounded-card shadow-soft border border-neutral-200;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   }
 
   .btn-primary {
-    @apply bg-accent text-white px-4 py-2 rounded-button font-medium 
-           hover:bg-accent-dark transition-colors duration-200 
-           active:scale-[0.98] shadow-soft;
+    @apply bg-accent text-white px-4 py-2 rounded-button font-medium shadow-soft;
+    transition: all 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary:hover {
+    @apply bg-accent-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98) translateY(0);
   }
 
   .btn-secondary {
-    @apply bg-neutral-100 text-neutral-700 px-4 py-2 rounded-button font-medium 
-           hover:bg-neutral-200 transition-colors duration-200 
-           active:scale-[0.98];
+    @apply bg-neutral-100 text-neutral-700 px-4 py-2 rounded-button font-medium;
+    transition: all 0.2s ease-out;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-neutral-200;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
   }
 
   .input {
-    @apply w-full px-4 py-2.5 rounded-button border border-neutral-300 
-           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent 
-           transition-all duration-200 bg-white;
+    @apply w-full px-4 py-2.5 rounded-button border border-neutral-300 bg-white;
+    transition: all 0.2s ease-out;
+  }
+
+  .input:focus {
+    @apply outline-none ring-2 ring-accent border-transparent;
+    transform: scale(1.01);
+  }
+
+  /* Animation classes */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce 0.6s ease-out;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .animate-sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+
+  .animate-confetti {
+    animation: confetti 2s ease-out forwards;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
   }
 }

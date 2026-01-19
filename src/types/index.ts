@@ -9,6 +9,7 @@ export interface Habit {
   schedule: HabitSchedule;
   createdAt: string;
   archived: boolean;
+  emoji?: string;
 }
 
 export interface HabitCompletion {
