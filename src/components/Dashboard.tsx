@@ -24,14 +24,24 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen flex items-center justify-center animate-fade-in">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
           <p className="text-neutral-600 animate-pulse-subtle">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
-  const sortedModules = [...state.dashboardModules].sort((a, b) => a.position - b.position);
+  // If no modules, show default modules
+  const modules = state.dashboardModules.length > 0 
+    ? state.dashboardModules 
+    : [
+        { id: '1', type: 'token-balance' as const, position: 0 },
+        { id: '2', type: 'habits' as const, position: 1 },
+        { id: '3', type: 'todos' as const, position: 2 },
+        { id: '4', type: 'journal' as const, position: 3 },
+      ];
+
+  const sortedModules = [...modules].sort((a, b) => a.position - b.position);
 
   const renderModule = (module: any) => {
     switch (module.type) {
@@ -94,20 +104,32 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
-          {sortedModules.map((module, index) => (
-            <div 
-              key={module.id} 
-              className="card p-6 animate-fade-in-up"
-              style={{ 
-                animationDelay: `${index * 0.1}s`,
-                opacity: 0
-              }}
+        {sortedModules.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-neutral-600 mb-4">No dashboard modules configured.</p>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="btn-primary"
             >
-              {renderModule(module)}
-            </div>
-          ))}
-        </div>
+              Configure Dashboard
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {sortedModules.map((module, index) => (
+              <div 
+                key={module.id} 
+                className="card p-6 animate-fade-in-up"
+                style={{ 
+                  animationDelay: `${index * 0.1}s`,
+                  opacity: 0
+                }}
+              >
+                {renderModule(module)}
+              </div>
+            ))}
+          </div>
+        )}
       </main>
 
       {showSettings && (

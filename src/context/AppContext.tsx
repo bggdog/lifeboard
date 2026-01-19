@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { AppState, Habit, Todo, Note, WorkNote, Edit, Lift, LiftEntry, Reward, Redemption, HabitCompletion, DashboardModule } from '../types';
 import { api } from '../utils/api';
+import { supabase } from '../utils/supabase';
 import { format } from 'date-fns';
 
 type AppAction =
@@ -179,9 +180,37 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const data = await api.getState();
+      
+      // If no dashboard modules, initialize defaults
+      if (!data.dashboardModules || data.dashboardModules.length === 0) {
+        const defaultModules = [
+          { id: '1', type: 'token-balance' as const, position: 0 },
+          { id: '2', type: 'habits' as const, position: 1 },
+          { id: '3', type: 'todos' as const, position: 2 },
+          { id: '4', type: 'journal' as const, position: 3 },
+        ];
+        data.dashboardModules = defaultModules;
+        // Save defaults to database
+        try {
+          await api.updateDashboardModules(defaultModules);
+        } catch (err) {
+          console.warn('Failed to save default modules:', err);
+        }
+      }
+      
       dispatch({ type: 'LOAD_STATE', payload: data });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading state:', error);
+      const errorMessage = error?.message || String(error);
+      
+      // Show error to user
+      if (errorMessage.includes('Not authenticated') || errorMessage.includes('JWT')) {
+        alert('Authentication error. Please sign in again.');
+        await supabase.auth.signOut();
+        window.location.reload();
+        return;
+      }
+      
       dispatch({ type: 'SET_LOADING', payload: false });
       dispatch({
         type: 'LOAD_STATE',
