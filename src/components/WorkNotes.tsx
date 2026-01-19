@@ -91,6 +91,9 @@ const WorkNotes = () => {
   };
 
   const handleAddEdit = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkNotes.tsx:handleAddEdit:ENTRY',message:'handleAddEdit called',data:{newEditTitle:newEditTitle?.substring(0,50),newEditType,titleTrimmed:newEditTitle?.trim()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!newEditTitle.trim()) return;
 
     try {
@@ -101,11 +104,19 @@ const WorkNotes = () => {
         completed: false,
         createdAt: new Date().toISOString(),
       };
-
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkNotes.tsx:handleAddEdit:BEFORE_ADD',message:'Before addEdit call',data:{editId:edit.id,editTitle:edit.title,editType:edit.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       await addEdit(edit);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkNotes.tsx:handleAddEdit:SUCCESS',message:'addEdit succeeded',data:{editId:edit.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setNewEditTitle('');
       setNewEditType('short-form');
     } catch (error: any) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkNotes.tsx:handleAddEdit:ERROR',message:'Error in handleAddEdit',data:{errorMessage:error?.message,errorType:error?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       console.error('Error adding edit:', error);
       alert(`Failed to add edit: ${error?.message || 'Unknown error'}`);
     }

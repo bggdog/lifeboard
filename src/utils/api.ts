@@ -309,13 +309,34 @@ export const api = {
   },
 
   async createEdit(edit: any) {
-    const response = await fetch(`${API_BASE}/edits`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(edit),
-    });
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:ENTRY',message:'Creating edit',data:{apiBase:API_BASE,editId:edit?.id,editTitle:edit?.title,editType:edit?.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    const requestBody = JSON.stringify(edit);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:BEFORE_FETCH',message:'Request details',data:{url:`${API_BASE}/edits`,method:'POST',bodyLength:requestBody.length,bodyPreview:requestBody.substring(0,100)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    let response;
+    try {
+      response = await fetch(`${API_BASE}/edits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+      });
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:AFTER_FETCH',message:'Response received',data:{status:response.status,statusText:response.statusText,ok:response.ok,headers:Object.fromEntries(response.headers.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+    } catch (networkError: any) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:NETWORK_ERROR',message:'Network error caught',data:{error:networkError?.message,errorType:networkError?.name,stack:networkError?.stack?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+      // #endregion
+      throw networkError;
+    }
     if (!response.ok) {
       const errorText = await response.text();
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:ERROR_RESPONSE',message:'Non-OK response',data:{status:response.status,statusText:response.statusText,errorText:errorText.substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       let errorMessage = 'Failed to create edit';
       try {
         const errorJson = JSON.parse(errorText);
@@ -325,7 +346,11 @@ export const api = {
       }
       throw new Error(errorMessage);
     }
-    return response.json();
+    const result = await response.json();
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:createEdit:SUCCESS',message:'Edit created successfully',data:{result},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    return result;
   },
 
   async updateEdit(id: string, edit: any) {

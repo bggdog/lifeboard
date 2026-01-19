@@ -283,15 +283,23 @@ app.delete('/api/work-notes/:id', async (req, res) => {
 
 // Edits
 app.post('/api/edits', async (req, res) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server.js:POST/api/edits:ENTRY',message:'Edit endpoint hit',data:{bodyKeys:Object.keys(req.body||{}),bodyPreview:JSON.stringify(req.body).substring(0,200),hasSupabaseUrl:!!process.env.SUPABASE_URL,hasSupabaseKey:!!process.env.SUPABASE_ANON_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   try {
-    console.log('Creating edit:', JSON.stringify(req.body));
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server.js:POST/api/edits:BEFORE_DB',message:'Before db.addEdit',data:{editId:req.body?.id,editTitle:req.body?.title},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     const result = await db.addEdit(req.body);
-    console.log('Edit created successfully:', result.id);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server.js:POST/api/edits:AFTER_DB',message:'db.addEdit succeeded',data:{resultId:result?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     res.json({ success: true });
   } catch (error: any) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/080f6d9e-85d9-485e-81c2-7a9cfae0db22',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server.js:POST/api/edits:ERROR',message:'Error in edit endpoint',data:{errorMessage:error?.message,errorCode:error?.code,errorDetails:error?.details,errorHint:error?.hint,errorStack:error?.stack?.substring(0,300)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     console.error('Error creating edit:', error);
-    console.error('Error stack:', error?.stack);
-    console.error('Error details:', JSON.stringify(error));
     res.status(500).json({ 
       error: 'Failed to create edit', 
       details: error?.message || error?.details || error?.hint || String(error),
