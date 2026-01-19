@@ -11,6 +11,21 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Add request logging for debugging
+app.use((req, res, next) => {
+  if (process.env.VERCEL === '1') {
+    console.log(`${req.method} ${req.path}`, {
+      body: req.body ? Object.keys(req.body) : 'no body',
+      query: req.query,
+      env: {
+        hasSupabaseUrl: !!process.env.SUPABASE_URL,
+        hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
+      }
+    });
+  }
+  next();
+});
+
 // Initialize default dashboard modules if none exist
 const initializeDefaults = async () => {
   try {
@@ -269,11 +284,19 @@ app.delete('/api/work-notes/:id', async (req, res) => {
 // Edits
 app.post('/api/edits', async (req, res) => {
   try {
-    await db.addEdit(req.body);
+    console.log('Creating edit:', JSON.stringify(req.body));
+    const result = await db.addEdit(req.body);
+    console.log('Edit created successfully:', result.id);
     res.json({ success: true });
   } catch (error: any) {
     console.error('Error creating edit:', error);
-    res.status(500).json({ error: 'Failed to create edit', details: error?.message || error?.details || String(error) });
+    console.error('Error stack:', error?.stack);
+    console.error('Error details:', JSON.stringify(error));
+    res.status(500).json({ 
+      error: 'Failed to create edit', 
+      details: error?.message || error?.details || error?.hint || String(error),
+      code: error?.code
+    });
   }
 });
 
