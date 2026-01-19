@@ -401,12 +401,12 @@ export const db = {
   },
 
   async deleteReward(id) {
-    await supabase
+    await getSupabase()
       .from('redemptions')
       .delete()
       .eq('reward_id', id);
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('rewards')
       .delete()
       .eq('id', id);
@@ -735,12 +735,12 @@ export const db = {
   },
 
   async deleteLift(id) {
-    await supabase
+    await getSupabase()
       .from('lift_entries')
       .delete()
       .eq('lift_id', id);
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('lifts')
       .delete()
       .eq('id', id);
