@@ -2,15 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 
 // Load environment variables from .env file (only for local development)
 // Vercel provides environment variables automatically, so we skip in production
-let dotenv;
-try {
-  if (process.env.VERCEL !== '1') {
-    dotenv = await import('dotenv');
-    dotenv.default.config();
+// Use synchronous import to avoid top-level await issues
+if (process.env.VERCEL !== '1') {
+  try {
+    // Dynamic import for dotenv (only in non-Vercel environments)
+    import('dotenv').then(dotenv => {
+      dotenv.default.config();
+      console.log('[db.js] dotenv loaded');
+    }).catch(err => {
+      console.log('[db.js] dotenv not available (non-fatal):', err?.message);
+    });
+  } catch (err) {
+    // Ignore - dotenv may not be needed
   }
-} catch (dotenvError) {
-  // dotenv not available or not needed - this is fine
-  console.log('[db.js] dotenv not loaded (expected in Vercel):', dotenvError?.message);
 }
 
 // Read env vars at module load (may be undefined in Vercel until runtime)
