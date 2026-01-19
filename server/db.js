@@ -7,8 +7,24 @@ if (process.env.VERCEL !== '1') {
   dotenv.config();
 }
 
+// Read env vars at module load (may be undefined in Vercel until runtime)
+// This is safe - we check again in getSupabase() at runtime
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+// #region agent log
+console.log('[db.js] Module loaded', {
+  hasSupabaseUrl: !!supabaseUrl,
+  hasSupabaseKey: !!supabaseKey,
+  hasProcessEnvUrl: !!process.env.SUPABASE_URL,
+  hasProcessEnvKey: !!process.env.SUPABASE_ANON_KEY,
+  vercel: process.env.VERCEL,
+  timestamp: Date.now(),
+  sessionId: 'debug-session',
+  runId: 'run2',
+  hypothesisId: 'B'
+});
+// #endregion
 
 // Initialize Supabase client
 // In Vercel, environment variables are available at runtime
