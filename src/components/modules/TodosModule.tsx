@@ -172,7 +172,12 @@ const TodosModule = () => {
                           <div className="w-1 h-6 bg-neutral-300 rounded-full" />
                         </div>
                         <button
-                          onClick={() => handleToggleComplete(todo)}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleComplete(todo);
+                          }}
                           className={`flex-shrink-0 w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
                             todo.completed
                               ? 'bg-accent border-accent text-white scale-110'
@@ -190,7 +195,12 @@ const TodosModule = () => {
                           )}
                         </div>
                         <button
-                          onClick={() => handleDelete(todo.id)}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDelete(todo.id);
+                          }}
                           className="p-1.5 rounded-button hover:bg-red-50 transition-all duration-200 hover:animate-shake"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
