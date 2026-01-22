@@ -103,10 +103,10 @@ export default function AppShell({ children }: AppShellProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col pb-20">
+    <div className="min-h-screen bg-neutral-50 flex flex-col pb-20 overflow-x-hidden">
       {/* Top Bar */}
       <header className="bg-white border-b border-neutral-200 safe-area-top">
-        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between overflow-x-hidden">
           <h1 className="text-xl font-semibold text-neutral-900">LifeOS</h1>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 rounded-full">
@@ -131,8 +131,8 @@ export default function AppShell({ children }: AppShellProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
-        <div className="max-w-[420px] mx-auto min-h-full bg-neutral-50">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20">
+        <div className="max-w-[420px] mx-auto min-h-full bg-neutral-50 w-full">
           {children}
         </div>
       </main>

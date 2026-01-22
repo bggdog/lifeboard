@@ -21,6 +21,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #faf9f7;
   color: #171716;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 /* iOS-like safe area support */

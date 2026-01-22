@@ -581,7 +581,7 @@ export default function TodayPage() {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-4 pb-24">
+      <div className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700 mb-4">
@@ -691,7 +691,7 @@ export default function TodayPage() {
               </select>
             ) : null}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 placeholder={quickAddMode === 'lift' ? 'Notes (optional)' : 'Title...'}
@@ -700,33 +700,35 @@ export default function TodayPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleQuickAdd();
                 }}
-                className="flex-1 px-4 py-2 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                className="flex-1 min-w-0 px-4 py-2 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
               />
-              {quickAddMode !== 'lift' && (
-                <div className="flex gap-1">
-                  {tokenOptions.map((tokens) => (
-                    <button
-                      key={tokens}
-                      onClick={() => setQuickAddTokens(tokens)}
-                      className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        quickAddTokens === tokens
-                          ? 'bg-accent text-white'
-                          : 'bg-neutral-100 text-neutral-600'
-                      }`}
-                    >
-                      +{tokens}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <button
-                onClick={handleQuickAdd}
-                disabled={pendingQuickAdd}
-                className="px-4 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 flex items-center gap-1 text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add
-              </button>
+              <div className="flex gap-2 items-center flex-shrink-0">
+                {quickAddMode !== 'lift' && (
+                  <div className="flex gap-1">
+                    {tokenOptions.map((tokens) => (
+                      <button
+                        key={tokens}
+                        onClick={() => setQuickAddTokens(tokens)}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                          quickAddTokens === tokens
+                            ? 'bg-accent text-white'
+                            : 'bg-neutral-100 text-neutral-600'
+                        }`}
+                      >
+                        +{tokens}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={handleQuickAdd}
+                  disabled={pendingQuickAdd}
+                  className="px-4 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 flex items-center gap-1 text-sm whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </button>
+              </div>
             </div>
           </div>
         </Card>
@@ -876,16 +878,16 @@ export default function TodayPage() {
               {editItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-50 min-w-0"
                 >
-                  <span className="flex-1 text-sm text-neutral-900">{item.title}</span>
-                  <Pill variant="neutral" size="sm">
+                  <span className="flex-1 text-sm text-neutral-900 truncate min-w-0">{item.title}</span>
+                  <Pill variant="neutral" size="sm" className="flex-shrink-0">
                     {item.type === 'short_form' ? 'Short' : item.type === 'long_form' ? 'Long' : 'Episode'}
                   </Pill>
                   <button
                     onClick={() => handleCycleEditStatus(item)}
                     disabled={pendingToggles.has(item.id)}
-                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0 ${
                       item.status === 'done'
                         ? 'bg-green-100 text-green-700'
                         : item.status === 'in_progress'
