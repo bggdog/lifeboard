@@ -744,22 +744,22 @@ export default function WorkPage() {
 
             {/* Add Edit Item */}
             <div className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                <input
-                  type="text"
-                  placeholder="Edit title…"
-                  value={newEditTitle}
-                  onChange={(e) => setNewEditTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddEditItem();
-                  }}
-                  className="flex-1 min-w-0 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-                <div className="flex gap-2 flex-shrink-0">
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Edit title…"
+                    value={newEditTitle}
+                    onChange={(e) => setNewEditTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddEditItem();
+                    }}
+                    className="flex-1 min-w-0 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
                   <select
                     value={newEditType}
                     onChange={(e) => setNewEditType(e.target.value as EditItemType)}
-                    className="px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="px-3 sm:px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent flex-shrink-0"
                   >
                     {editTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -767,9 +767,24 @@ export default function WorkPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+                <div className="flex gap-2 items-center">
+                  {tokenOptions.map((tokens) => (
+                    <button
+                      key={tokens}
+                      onClick={() => setSelectedEditTokens(tokens)}
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+                        selectedEditTokens === tokens
+                          ? 'bg-accent text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      }`}
+                    >
+                      +{tokens}
+                    </button>
+                  ))}
                   <button
                     onClick={handleAddEditItem}
-                    className="px-4 sm:px-6 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2 whitespace-nowrap"
+                    className="ml-auto px-4 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -777,21 +792,6 @@ export default function WorkPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                {tokenOptions.map((tokens) => (
-                  <button
-                    key={tokens}
-                    onClick={() => setSelectedEditTokens(tokens)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                      selectedEditTokens === tokens
-                        ? 'bg-accent text-white'
-                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                    }`}
-                  >
-                    +{tokens}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Edit Items List */}
