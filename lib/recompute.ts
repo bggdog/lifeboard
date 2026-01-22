@@ -5,6 +5,7 @@ import { fetchHabitCompletions } from './habitCompletions';
 import { computeAreaScore } from './areaScoring';
 import { upsertLifeAreaScore } from './lifeAreaScores';
 import { getDateStringDaysAgo, getTodayDateString } from './streaks';
+import { fetchWorkTodos } from './work/workTodos';
 
 /**
  * Recompute all life area scores for a profile
@@ -65,7 +66,38 @@ export async function recomputeAllLifeAreas(profileId: string): Promise<void> {
     });
   }
 
-  // Step 6: Compute score for each life area
+  // Step 6: For Professional area, also fetch work todos completions
+  let professionalAreaId: string | null = null;
+  const professionalArea = lifeAreas.find((area) => area.name === 'Professional');
+  if (professionalArea) {
+    professionalAreaId = professionalArea.id;
+  }
+
+  // Fetch work todos for Professional area scoring
+  let workTodosCompletions: Record<string, Set<string>> = {};
+  if (professionalAreaId) {
+    const workTodos = await fetchWorkTodos(profileId);
+    const fromDate = getDateStringDaysAgo(daysWindow - 1);
+    const toDate = getTodayDateString();
+
+    // Build completions map from work todos (treat each completed todo as a completion)
+    workTodos.forEach((todo) => {
+      if (todo.completed && todo.completed_at) {
+        const completedDate = new Date(todo.completed_at);
+        const dateString = formatDateString(completedDate);
+        
+        // Check if completion is within the window
+        if (dateString >= fromDate && dateString <= toDate) {
+          if (!workTodosCompletions[todo.id]) {
+            workTodosCompletions[todo.id] = new Set();
+          }
+          workTodosCompletions[todo.id].add(dateString);
+        }
+      }
+    });
+  }
+
+  // Step 7: Compute score for each life area
   const scorePromises = lifeAreas.map(async (area) => {
     const habitsInArea = habitsByArea[area.id] || [];
 
@@ -75,10 +107,34 @@ export async function recomputeAllLifeAreas(profileId: string): Promise<void> {
       areaCompletions[habit.id] = completionsByHabit[habit.id] || new Set();
     });
 
+    // For Professional area, include work todos as "habits" for scoring
+    let habitsForScoring = habitsInArea;
+    if (area.id === professionalAreaId && Object.keys(workTodosCompletions).length > 0) {
+      // Create virtual "habits" from work todos for scoring purposes
+      const workTodos = await fetchWorkTodos(profileId);
+      const virtualHabits = workTodos.map((todo) => ({
+        id: `work_todo_${todo.id}`,
+        profile_id: profileId,
+        title: todo.title,
+        category: null,
+        tokens: todo.tokens,
+        created_at: todo.created_at,
+        active: true,
+        life_area_id: null,
+      }));
+
+      habitsForScoring = [...habitsInArea, ...virtualHabits];
+      
+      // Add work todos completions to area completions
+      Object.keys(workTodosCompletions).forEach((todoId) => {
+        areaCompletions[`work_todo_${todoId}`] = workTodosCompletions[todoId];
+      });
+    }
+
     // Compute score
     const result = computeAreaScore({
       daysWindow,
-      habitsInArea,
+      habitsInArea: habitsForScoring,
       completionsByHabit: areaCompletions,
     });
 
@@ -93,4 +149,14 @@ export async function recomputeAllLifeAreas(profileId: string): Promise<void> {
   });
 
   await Promise.all(scorePromises);
+}
+
+/**
+ * Format Date to YYYY-MM-DD string
+ */
+function formatDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }

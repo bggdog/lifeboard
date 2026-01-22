@@ -12,11 +12,9 @@ export interface LifeArea {
 
 const DEFAULT_LIFE_AREAS = [
   { name: 'Spiritual', icon: '🙏' },
-  { name: 'Fitness', icon: '💪' },
-  { name: 'Work', icon: '💼' },
+  { name: 'Physical', icon: '💪' },
+  { name: 'Professional', icon: '💼' },
   { name: 'Relationships', icon: '❤️' },
-  { name: 'Learning', icon: '📚' },
-  { name: 'Health', icon: '🧠' },
 ];
 
 /**
