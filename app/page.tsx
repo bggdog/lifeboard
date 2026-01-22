@@ -148,7 +148,12 @@ export default function TodayPage() {
       profileId,
       ({ eventType, new: newHabit, old: oldHabit }) => {
         if (eventType === 'INSERT' && newHabit && newHabit.active) {
-          setHabits((prev) => [...prev, newHabit as Habit]);
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setHabits((prev) => {
+            const exists = prev.some((h) => h.id === newHabit.id);
+            if (exists) return prev;
+            return [...prev, newHabit as Habit];
+          });
         } else if (eventType === 'UPDATE' && newHabit) {
           setHabits((prev) =>
             prev.map((h) => (h.id === newHabit.id ? (newHabit as Habit) : h)).filter((h) => h.active)
@@ -189,7 +194,12 @@ export default function TodayPage() {
       profileId,
       ({ eventType, new: newTodo, old: oldTodo }) => {
         if (eventType === 'INSERT' && newTodo && !newTodo.completed) {
-          setTodos((prev) => [newTodo as Todo, ...prev]);
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setTodos((prev) => {
+            const exists = prev.some((t) => t.id === newTodo.id);
+            if (exists) return prev;
+            return [newTodo as Todo, ...prev];
+          });
         } else if (eventType === 'UPDATE' && newTodo) {
           setTodos((prev) => {
             if (newTodo.completed) {
@@ -210,7 +220,12 @@ export default function TodayPage() {
       profileId,
       ({ eventType, new: newTodo, old: oldTodo }) => {
         if (eventType === 'INSERT' && newTodo && !newTodo.completed) {
-          setWorkTodos((prev) => [newTodo as WorkTodo, ...prev]);
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setWorkTodos((prev) => {
+            const exists = prev.some((t) => t.id === newTodo.id);
+            if (exists) return prev;
+            return [newTodo as WorkTodo, ...prev];
+          });
         } else if (eventType === 'UPDATE' && newTodo) {
           setWorkTodos((prev) => {
             if (newTodo.completed) {
@@ -231,7 +246,12 @@ export default function TodayPage() {
       profileId,
       ({ eventType, new: newItem, old: oldItem }) => {
         if (eventType === 'INSERT' && newItem && newItem.status !== 'done') {
-          setEditItems((prev) => [newItem as EditItem, ...prev].slice(0, 6));
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setEditItems((prev) => {
+            const exists = prev.some((i) => i.id === newItem.id);
+            if (exists) return prev;
+            return [newItem as EditItem, ...prev].slice(0, 6);
+          });
         } else if (eventType === 'UPDATE' && newItem) {
           setEditItems((prev) => {
             if (newItem.status === 'done') {

@@ -63,7 +63,12 @@ export default function TodoPage() {
       profileId,
       ({ eventType, new: newTodo, old: oldTodo }) => {
         if (eventType === 'INSERT' && newTodo) {
-          setTodos((prev) => [newTodo as Todo, ...prev]);
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setTodos((prev) => {
+            const exists = prev.some((t) => t.id === newTodo.id);
+            if (exists) return prev;
+            return [newTodo as Todo, ...prev];
+          });
         } else if (eventType === 'UPDATE' && newTodo) {
           setTodos((prev) =>
             prev.map((t) => (t.id === newTodo.id ? (newTodo as Todo) : t))

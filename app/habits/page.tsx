@@ -93,7 +93,12 @@ export default function HabitsPage() {
       profileId,
       ({ eventType, new: newHabit, old: oldHabit }) => {
         if (eventType === 'INSERT' && newHabit && newHabit.active) {
-          setHabits((prev) => [...prev, newHabit as Habit]);
+          // Only add if it doesn't already exist (avoid duplicates from optimistic updates)
+          setHabits((prev) => {
+            const exists = prev.some((h) => h.id === newHabit.id);
+            if (exists) return prev;
+            return [...prev, newHabit as Habit];
+          });
         } else if (eventType === 'UPDATE' && newHabit) {
           setHabits((prev) =>
             prev.map((h) => (h.id === newHabit.id ? (newHabit as Habit) : h)).filter((h) => h.active)
