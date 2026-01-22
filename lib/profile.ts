@@ -13,15 +13,42 @@ export interface Profile {
 /**
  * Get or create a profile for the current session
  * Creates an anonymous profile if user is not authenticated
- * Uses device/session ID to track profiles
+ * Uses Supabase anonymous auth for consistent user IDs across devices
  */
 export async function getOrCreateProfile(): Promise<Profile> {
   // Get current session (anon or authenticated)
-  const { data: { session } } = await supabase.auth.getSession();
+  let { data: { session } } = await supabase.auth.getSession();
   
-  // Use session user ID if authenticated, otherwise use anonymous ID
-  const profileId = session?.user?.id || `anon_${getSessionId()}`;
+  // If no session exists, sign in anonymously to get a consistent user ID
+  if (!session) {
+    console.log('[Profile] No session found, signing in anonymously...');
+    const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+    
+    if (authError) {
+      console.error('[Profile] Error signing in anonymously:', authError);
+      // Fallback to localStorage-based ID if anonymous auth fails
+      const profileId = `anon_${getSessionId()}`;
+      return await createOrFetchProfile(profileId);
+    }
+    
+    session = authData.session;
+    console.log('[Profile] Signed in anonymously, user ID:', session?.user?.id);
+  }
   
+  // Use session user ID (from anonymous or authenticated auth)
+  const profileId = session?.user?.id;
+  
+  if (!profileId) {
+    throw new Error('Could not get user ID from session');
+  }
+  
+  return await createOrFetchProfile(profileId);
+}
+
+/**
+ * Helper to create or fetch a profile by ID
+ */
+async function createOrFetchProfile(profileId: string): Promise<Profile> {
   // Try to fetch existing profile
   const { data: existingProfile, error: fetchError } = await supabase
     .from('profiles')
@@ -61,6 +88,8 @@ export async function getOrCreateProfile(): Promise<Profile> {
     return {
       id: profileId,
       token_balance: 0,
+      xp: 0,
+      level: 1,
       created_at: now,
       updated_at: now,
     };
