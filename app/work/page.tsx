@@ -755,6 +755,21 @@ export default function WorkPage() {
                   }}
                   className="w-full px-3 py-2 bg-neutral-50 rounded-lg border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
                 />
+                <div className="flex gap-1.5">
+                  {tokenOptions.map((tokens) => (
+                    <button
+                      key={tokens}
+                      onClick={() => setSelectedEditTokens(tokens)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                        selectedEditTokens === tokens
+                          ? 'bg-accent text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      }`}
+                    >
+                      +{tokens}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex gap-2">
                   <select
                     value={newEditType}
@@ -767,29 +782,14 @@ export default function WorkPage() {
                       </option>
                     ))}
                   </select>
-                  <div className="flex gap-1.5">
-                    {tokenOptions.map((tokens) => (
-                      <button
-                        key={tokens}
-                        onClick={() => setSelectedEditTokens(tokens)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-                          selectedEditTokens === tokens
-                            ? 'bg-accent text-white'
-                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                        }`}
-                      >
-                        +{tokens}
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    onClick={handleAddEditItem}
+                    className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add
+                  </button>
                 </div>
-                <button
-                  onClick={handleAddEditItem}
-                  className="w-full px-3 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Add
-                </button>
               </div>
             </div>
 
