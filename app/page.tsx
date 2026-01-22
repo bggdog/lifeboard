@@ -19,7 +19,9 @@ import { fetchEditItems, setEditItemStatus, type EditItem } from '@/lib/work/edi
 import { fetchLifts, type Lift } from '@/lib/gym/lifts';
 import { createSet } from '@/lib/gym/sets';
 import { fetchTodayStats } from '@/lib/game/daily';
-import { fetchLifeAreas, type LifeArea } from '@/lib/lifeAreas';
+import { fetchLifeAreas, createDefaultLifeAreas, type LifeArea } from '@/lib/lifeAreas';
+import { fetchLifeAreaScores } from '@/lib/lifeAreaScores';
+import { recomputeAllLifeAreas } from '@/lib/recompute';
 import { supabase } from '@/lib/supabase/client';
 import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
 
@@ -49,6 +51,7 @@ export default function TodayPage() {
   const [editItems, setEditItems] = useState<EditItem[]>([]);
   const [lifts, setLifts] = useState<Lift[]>([]);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
+  const [lifeAreaScores, setLifeAreaScores] = useState<Record<string, { score: number; status: string }>>({});
   const [todayStats, setTodayStats] = useState<{ actions_completed: number; tokens_earned: number; streak: number } | null>(null);
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
@@ -84,6 +87,9 @@ export default function TodayPage() {
           setLevel(profileData.level ?? 1);
         }
 
+        // Ensure default life areas exist
+        await createDefaultLifeAreas(profile.id);
+
         // Fetch all data in parallel
         const [
           habitsData,
@@ -102,6 +108,22 @@ export default function TodayPage() {
           fetchLifeAreas(profile.id),
           fetchTodayStats(profile.id),
         ]);
+
+        // Recompute life area scores (non-blocking)
+        recomputeAllLifeAreas(profile.id).catch((err) => {
+          console.error('Error recomputing life areas:', err);
+        });
+
+        // Fetch life area scores
+        const scoresData = await fetchLifeAreaScores(profile.id);
+        const scoresMap: Record<string, { score: number; status: string }> = {};
+        Object.keys(scoresData).forEach((areaId) => {
+          scoresMap[areaId] = {
+            score: scoresData[areaId].score,
+            status: scoresData[areaId].status,
+          };
+        });
+        setLifeAreaScores(scoresMap);
 
         const activeHabits = habitsData.filter((h) => h.active);
         setHabits(activeHabits);
