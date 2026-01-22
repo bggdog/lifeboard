@@ -252,7 +252,7 @@ export default function GymPage() {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-4 pb-24">
+      <div className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
         {/* Header Card */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Gym</h1>
@@ -267,8 +267,8 @@ export default function GymPage() {
         )}
 
         {/* Add Lift */}
-        <div className="bg-white rounded-2xl shadow-sm p-4">
-          <div className="flex gap-2 mb-3">
+        <div className="bg-white rounded-2xl shadow-sm p-3">
+          <div className="space-y-2">
             <input
               type="text"
               placeholder="Add a lift…"
@@ -277,25 +277,27 @@ export default function GymPage() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddLift();
               }}
-              className="flex-1 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full px-3 py-2 bg-neutral-50 rounded-lg border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
             />
-            <input
-              type="text"
-              placeholder="Category (optional)"
-              value={newLiftCategory}
-              onChange={(e) => setNewLiftCategory(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddLift();
-              }}
-              className="w-32 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <button
-              onClick={handleAddLift}
-              className="px-6 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add
-            </button>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Category (optional)"
+                value={newLiftCategory}
+                onChange={(e) => setNewLiftCategory(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddLift();
+                }}
+                className="flex-1 px-3 py-2 bg-neutral-50 rounded-lg border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+              <button
+                onClick={handleAddLift}
+                className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add
+              </button>
+            </div>
           </div>
         </div>
 
