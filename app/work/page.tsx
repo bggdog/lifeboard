@@ -768,7 +768,7 @@ export default function WorkPage() {
                     ))}
                   </select>
                 </div>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center flex-wrap">
                   {tokenOptions.map((tokens) => (
                     <button
                       key={tokens}
@@ -782,14 +782,14 @@ export default function WorkPage() {
                       +{tokens}
                     </button>
                   ))}
-                  <button
-                    onClick={handleAddEditItem}
-                    className="ml-auto px-4 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2 whitespace-nowrap"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
                 </div>
+                <button
+                  onClick={handleAddEditItem}
+                  className="w-full px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </button>
               </div>
 
             </div>
