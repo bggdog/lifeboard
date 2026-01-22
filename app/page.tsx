@@ -21,6 +21,7 @@ import { createSet } from '@/lib/gym/sets';
 import { fetchTodayStats } from '@/lib/game/daily';
 import { fetchLifeAreas, type LifeArea } from '@/lib/lifeAreas';
 import { supabase } from '@/lib/supabase/client';
+import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
 
 type QuickAddMode = 'todo' | 'work' | 'habit' | 'lift';
 
@@ -130,6 +131,157 @@ export default function TodayPage() {
 
     loadData();
   }, []);
+
+  // Set up real-time subscriptions when profileId is available
+  useEffect(() => {
+    if (!profileId) return;
+
+    // Subscribe to habits changes
+    const unsubscribeHabits = subscribeToTable<Habit>(
+      'habits',
+      profileId,
+      ({ eventType, new: newHabit, old: oldHabit }) => {
+        if (eventType === 'INSERT' && newHabit && newHabit.active) {
+          setHabits((prev) => [...prev, newHabit as Habit]);
+        } else if (eventType === 'UPDATE' && newHabit) {
+          setHabits((prev) =>
+            prev.map((h) => (h.id === newHabit.id ? (newHabit as Habit) : h)).filter((h) => h.active)
+          );
+        } else if (eventType === 'DELETE' || (oldHabit && !(newHabit as any)?.active)) {
+          setHabits((prev) => prev.filter((h) => h.id !== (oldHabit?.id || newHabit?.id)));
+        }
+      }
+    );
+
+    // Subscribe to habit_completions changes
+    const unsubscribeCompletions = subscribeToTable<{ habit_id: string; date: string; completed: boolean }>(
+      'habit_completions',
+      profileId,
+      ({ eventType, new: newCompletion, old: oldCompletion }) => {
+        if (eventType === 'INSERT' && newCompletion) {
+          setHabitCompletions((prev) => {
+            const next = { ...prev };
+            if (!next[newCompletion.habit_id]) next[newCompletion.habit_id] = new Set();
+            next[newCompletion.habit_id].add(newCompletion.date);
+            return next;
+          });
+        } else if (eventType === 'DELETE' && oldCompletion) {
+          setHabitCompletions((prev) => {
+            const next = { ...prev };
+            if (next[oldCompletion.habit_id]) {
+              next[oldCompletion.habit_id].delete(oldCompletion.date);
+            }
+            return next;
+          });
+        }
+      }
+    );
+
+    // Subscribe to todos changes
+    const unsubscribeTodos = subscribeToTable<Todo>(
+      'todos',
+      profileId,
+      ({ eventType, new: newTodo, old: oldTodo }) => {
+        if (eventType === 'INSERT' && newTodo && !newTodo.completed) {
+          setTodos((prev) => [newTodo as Todo, ...prev]);
+        } else if (eventType === 'UPDATE' && newTodo) {
+          setTodos((prev) => {
+            if (newTodo.completed) {
+              return prev.filter((t) => t.id !== newTodo.id);
+            } else {
+              return prev.map((t) => (t.id === newTodo.id ? (newTodo as Todo) : t));
+            }
+          });
+        } else if (eventType === 'DELETE' && oldTodo) {
+          setTodos((prev) => prev.filter((t) => t.id !== oldTodo.id));
+        }
+      }
+    );
+
+    // Subscribe to work_todos changes
+    const unsubscribeWorkTodos = subscribeToTable<any>(
+      'work_todos',
+      profileId,
+      ({ eventType, new: newTodo, old: oldTodo }) => {
+        if (eventType === 'INSERT' && newTodo && !newTodo.completed) {
+          setWorkTodos((prev) => [newTodo as WorkTodo, ...prev]);
+        } else if (eventType === 'UPDATE' && newTodo) {
+          setWorkTodos((prev) => {
+            if (newTodo.completed) {
+              return prev.filter((t) => t.id !== newTodo.id);
+            } else {
+              return prev.map((t) => (t.id === newTodo.id ? (newTodo as WorkTodo) : t));
+            }
+          });
+        } else if (eventType === 'DELETE' && oldTodo) {
+          setWorkTodos((prev) => prev.filter((t) => t.id !== oldTodo.id));
+        }
+      }
+    );
+
+    // Subscribe to edit_items changes
+    const unsubscribeEditItems = subscribeToTable<any>(
+      'edit_items',
+      profileId,
+      ({ eventType, new: newItem, old: oldItem }) => {
+        if (eventType === 'INSERT' && newItem && newItem.status !== 'done') {
+          setEditItems((prev) => [newItem as EditItem, ...prev].slice(0, 6));
+        } else if (eventType === 'UPDATE' && newItem) {
+          setEditItems((prev) => {
+            if (newItem.status === 'done') {
+              return prev.filter((i) => i.id !== newItem.id);
+            } else {
+              return prev.map((i) => (i.id === newItem.id ? (newItem as EditItem) : i));
+            }
+          });
+        } else if (eventType === 'DELETE' && oldItem) {
+          setEditItems((prev) => prev.filter((i) => i.id !== oldItem.id));
+        }
+      }
+    );
+
+    // Subscribe to profile changes (token balance, XP, level)
+    const unsubscribeProfile = subscribeToProfile(profileId, ({ token_balance, xp, level: newLevel }) => {
+      if (token_balance !== undefined) {
+        tokenStore.setBalance(token_balance);
+      }
+      if (xp !== undefined) {
+        setXp(xp);
+      }
+      if (newLevel !== undefined) {
+        setLevel(newLevel);
+      }
+    });
+
+    // Subscribe to daily_stats changes
+    const unsubscribeDailyStats = subscribeToTable<any>(
+      'daily_stats',
+      profileId,
+      ({ eventType, new: newStats }) => {
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newStats) {
+          const todayDate = getToday();
+          if (newStats.date === todayDate) {
+            setTodayStats({
+              actions_completed: newStats.actions_completed || 0,
+              tokens_earned: newStats.tokens_earned || 0,
+              streak: newStats.streak || 0,
+            });
+          }
+        }
+      }
+    );
+
+    // Cleanup subscriptions on unmount or profileId change
+    return () => {
+      unsubscribeHabits();
+      unsubscribeCompletions();
+      unsubscribeTodos();
+      unsubscribeWorkTodos();
+      unsubscribeEditItems();
+      unsubscribeProfile();
+      unsubscribeDailyStats();
+    };
+  }, [profileId]);
 
   // Handle quick add
   const handleQuickAdd = async () => {

@@ -20,6 +20,7 @@ import {
 import { tokenStore } from '@/lib/tokenStore';
 import { getTokenBalance } from '@/lib/tokens';
 import { fetchLifeAreas, assignHabitToLifeArea, type LifeArea } from '@/lib/lifeAreas';
+import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
 
 export default function HabitsPage() {
   const router = useRouter();
@@ -81,6 +82,65 @@ export default function HabitsPage() {
 
     loadData();
   }, []);
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!profileId) return;
+
+    // Subscribe to habits changes
+    const unsubscribeHabits = subscribeToTable<Habit>(
+      'habits',
+      profileId,
+      ({ eventType, new: newHabit, old: oldHabit }) => {
+        if (eventType === 'INSERT' && newHabit && newHabit.active) {
+          setHabits((prev) => [...prev, newHabit as Habit]);
+        } else if (eventType === 'UPDATE' && newHabit) {
+          setHabits((prev) =>
+            prev.map((h) => (h.id === newHabit.id ? (newHabit as Habit) : h)).filter((h) => h.active)
+          );
+        } else if (eventType === 'DELETE' || (oldHabit && !(newHabit as any)?.active)) {
+          setHabits((prev) => prev.filter((h) => h.id !== (oldHabit?.id || newHabit?.id)));
+        }
+      }
+    );
+
+    // Subscribe to habit_completions changes
+    const unsubscribeCompletions = subscribeToTable<{ habit_id: string; date: string; completed: boolean }>(
+      'habit_completions',
+      profileId,
+      ({ eventType, new: newCompletion, old: oldCompletion }) => {
+        if (eventType === 'INSERT' && newCompletion) {
+          setCompletions((prev) => {
+            const next = { ...prev };
+            if (!next[newCompletion.habit_id]) next[newCompletion.habit_id] = new Set();
+            next[newCompletion.habit_id].add(newCompletion.date);
+            return next;
+          });
+        } else if (eventType === 'DELETE' && oldCompletion) {
+          setCompletions((prev) => {
+            const next = { ...prev };
+            if (next[oldCompletion.habit_id]) {
+              next[oldCompletion.habit_id].delete(oldCompletion.date);
+            }
+            return next;
+          });
+        }
+      }
+    );
+
+    // Subscribe to profile changes (token balance)
+    const unsubscribeProfile = subscribeToProfile(profileId, ({ token_balance }) => {
+      if (token_balance !== undefined) {
+        tokenStore.setBalance(token_balance);
+      }
+    });
+
+    return () => {
+      unsubscribeHabits();
+      unsubscribeCompletions();
+      unsubscribeProfile();
+    };
+  }, [profileId]);
 
   // Handle adding a new habit
   const handleAddHabit = async () => {

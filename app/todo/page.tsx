@@ -13,6 +13,7 @@ import {
 } from '@/lib/todos';
 import { tokenStore } from '@/lib/tokenStore';
 import { getTokenBalance } from '@/lib/tokens';
+import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
 
 export default function TodoPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -51,6 +52,40 @@ export default function TodoPage() {
 
     loadData();
   }, []);
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!profileId) return;
+
+    // Subscribe to todos changes
+    const unsubscribeTodos = subscribeToTable<Todo>(
+      'todos',
+      profileId,
+      ({ eventType, new: newTodo, old: oldTodo }) => {
+        if (eventType === 'INSERT' && newTodo) {
+          setTodos((prev) => [newTodo as Todo, ...prev]);
+        } else if (eventType === 'UPDATE' && newTodo) {
+          setTodos((prev) =>
+            prev.map((t) => (t.id === newTodo.id ? (newTodo as Todo) : t))
+          );
+        } else if (eventType === 'DELETE' && oldTodo) {
+          setTodos((prev) => prev.filter((t) => t.id !== oldTodo.id));
+        }
+      }
+    );
+
+    // Subscribe to profile changes (token balance)
+    const unsubscribeProfile = subscribeToProfile(profileId, ({ token_balance }) => {
+      if (token_balance !== undefined) {
+        tokenStore.setBalance(token_balance);
+      }
+    });
+
+    return () => {
+      unsubscribeTodos();
+      unsubscribeProfile();
+    };
+  }, [profileId]);
 
   // Handle adding a new todo
   const handleAddTodo = async () => {

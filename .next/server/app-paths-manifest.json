@@ -1,12 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/gym/page": "app/gym/page.js",
-  "/activity/page": "app/activity/page.js",
-  "/page": "app/page.js",
-  "/game/page": "app/game/page.js",
-  "/test/page": "app/test/page.js",
-  "/habits/[id]/page": "app/habits/[id]/page.js",
-  "/todo/page": "app/todo/page.js",
-  "/habits/page": "app/habits/page.js",
-  "/work/page": "app/work/page.js"
-}
+{}
