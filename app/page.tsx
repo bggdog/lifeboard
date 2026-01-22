@@ -964,10 +964,10 @@ export default function TodayPage() {
                             status === 'Excellent'
                               ? 'success'
                               : status === 'Good'
-                              ? 'info'
+                              ? 'accent'
                               : status === 'Okay'
                               ? 'warning'
-                              : 'danger'
+                              : 'warning'
                           }
                           className="text-xs"
                         >
