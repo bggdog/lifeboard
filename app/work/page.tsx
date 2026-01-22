@@ -743,23 +743,23 @@ export default function WorkPage() {
             </div>
 
             {/* Add Edit Item */}
-            <div className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="space-y-3">
+            <div className="bg-white rounded-2xl shadow-sm p-3">
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Edit title…"
+                  value={newEditTitle}
+                  onChange={(e) => setNewEditTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddEditItem();
+                  }}
+                  className="w-full px-3 py-2 bg-neutral-50 rounded-lg border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                />
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Edit title…"
-                    value={newEditTitle}
-                    onChange={(e) => setNewEditTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddEditItem();
-                    }}
-                    className="flex-1 min-w-0 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                  />
                   <select
                     value={newEditType}
                     onChange={(e) => setNewEditType(e.target.value as EditItemType)}
-                    className="px-3 sm:px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent flex-shrink-0"
+                    className="flex-1 px-3 py-2 bg-neutral-50 rounded-lg border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
                   >
                     {editTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -767,31 +767,30 @@ export default function WorkPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                  {tokenOptions.map((tokens) => (
-                    <button
-                      key={tokens}
-                      onClick={() => setSelectedEditTokens(tokens)}
-                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
-                        selectedEditTokens === tokens
-                          ? 'bg-accent text-white'
-                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                      }`}
-                    >
-                      +{tokens}
-                    </button>
-                  ))}
+                  <div className="flex gap-1.5">
+                    {tokenOptions.map((tokens) => (
+                      <button
+                        key={tokens}
+                        onClick={() => setSelectedEditTokens(tokens)}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                          selectedEditTokens === tokens
+                            ? 'bg-accent text-white'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                        }`}
+                      >
+                        +{tokens}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button
                   onClick={handleAddEditItem}
-                  className="w-full px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-3 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   Add
                 </button>
               </div>
-
             </div>
 
             {/* Edit Items List */}
