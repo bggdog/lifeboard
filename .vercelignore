@@ -1,7 +1,1 @@
-node_modules
-server
-.git
-.env
-.env.local
-*.log
-.DS_Store
+# Force redeploy
