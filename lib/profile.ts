@@ -12,14 +12,15 @@ export interface Profile {
 
 /**
  * Get or create a profile for the current session
- * Creates an anonymous profile if user is not authenticated
- * Uses Supabase anonymous auth for consistent user IDs across devices
+ * Uses authenticated user ID if logged in, otherwise creates anonymous profile
+ * Sessions persist automatically via Supabase (no login needed each time)
  */
 export async function getOrCreateProfile(): Promise<Profile> {
-  // Get current session (anon or authenticated)
+  // Get current session (authenticated or anonymous)
   let { data: { session } } = await supabase.auth.getSession();
   
   // If no session exists, sign in anonymously to get a consistent user ID
+  // This creates a persistent anonymous session that survives app restarts
   if (!session) {
     console.log('[Profile] No session found, signing in anonymously...');
     const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
@@ -35,12 +36,14 @@ export async function getOrCreateProfile(): Promise<Profile> {
     console.log('[Profile] Signed in anonymously, user ID:', session?.user?.id);
   }
   
-  // Use session user ID (from anonymous or authenticated auth)
+  // Use session user ID (from authenticated or anonymous auth)
   const profileId = session?.user?.id;
   
   if (!profileId) {
     throw new Error('Could not get user ID from session');
   }
+  
+  console.log('[Profile] Using profile ID:', profileId, session.user.is_anonymous ? '(anonymous)' : '(authenticated)');
   
   return await createOrFetchProfile(profileId);
 }

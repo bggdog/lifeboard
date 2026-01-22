@@ -1,12 +1,14 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy } from 'lucide-react';
+import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { tokenStore } from '@/lib/tokenStore';
 import { getTokenBalance } from '@/lib/tokens';
 import { getOrCreateProfile } from '@/lib/profile';
 import { supabase } from '@/lib/supabase/client';
+import { getCurrentUser, signOut } from '@/lib/auth';
+import AuthModal from './AuthModal';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -18,6 +20,8 @@ export default function AppShell({ children }: AppShellProps) {
   // Initialize with current tokenStore balance (if available)
   const [tokenBalance, setTokenBalance] = useState<number>(tokenStore.getBalance());
   const [level, setLevel] = useState<number>(1);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Subscribe to token store and load balance on mount and navigation
   useEffect(() => {
@@ -54,6 +58,41 @@ export default function AppShell({ children }: AppShellProps) {
     return unsubscribe;
   }, [pathname]); // Reload when navigating between pages
 
+  // Check authentication status
+  useEffect(() => {
+    async function checkAuth() {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    }
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleAuthSuccess = async (authUser: { id: string; email?: string }) => {
+    setUser(authUser);
+    // Reload the page to refresh data with new profile
+    window.location.reload();
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setUser(null);
+    // Reload to reset to anonymous profile
+    window.location.reload();
+  };
+
   const tabs = [
     { path: '/', icon: Home, label: 'Today' },
     { path: '/todo', icon: CheckSquare, label: 'To Do' },
@@ -80,6 +119,13 @@ export default function AppShell({ children }: AppShellProps) {
                 {tokenBalance}
               </span>
             </div>
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              title={user?.email || 'Sign in to sync across devices'}
+            >
+              <User className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </header>
@@ -117,6 +163,29 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
         </div>
       </nav>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
+
+      {/* User menu (if authenticated) */}
+      {user?.email && (
+        <div className="fixed bottom-20 right-4 max-w-[420px] mx-auto">
+          <div className="bg-white rounded-xl shadow-lg border border-neutral-200 p-3">
+            <div className="text-xs text-neutral-500 mb-2">Signed in as</div>
+            <div className="text-sm font-medium text-neutral-900 mb-2">{user.email}</div>
+            <button
+              onClick={handleSignOut}
+              className="text-xs text-red-600 hover:text-red-700"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
