@@ -66,6 +66,7 @@ export default function TodayPage() {
         setError(null);
         const profile = await getOrCreateProfile();
         setProfileId(profile.id);
+        console.log('[Today] Profile ID:', profile.id);
 
         // Load token balance
         const balance = await getTokenBalance(profile.id);
@@ -134,7 +135,12 @@ export default function TodayPage() {
 
   // Set up real-time subscriptions when profileId is available
   useEffect(() => {
-    if (!profileId) return;
+    if (!profileId) {
+      console.log('[Today] No profileId yet, skipping real-time subscriptions');
+      return;
+    }
+    
+    console.log('[Today] Setting up real-time subscriptions for profile:', profileId);
 
     // Subscribe to habits changes
     const unsubscribeHabits = subscribeToTable<Habit>(

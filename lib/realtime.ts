@@ -11,8 +11,11 @@ export function subscribeToTable<T>(
   profileId: string,
   callback: (payload: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new?: T; old?: T }) => void
 ): () => void {
+  const channelName = `${table}-${profileId}-${Date.now()}`;
+  console.log(`[Realtime] Subscribing to ${table} for profile ${profileId}`);
+  
   const channel = supabase
-    .channel(`${table}-${profileId}-${Date.now()}`)
+    .channel(channelName)
     .on(
       'postgres_changes',
       {
@@ -22,6 +25,7 @@ export function subscribeToTable<T>(
         filter: `profile_id=eq.${profileId}`,
       },
       (payload) => {
+        console.log(`[Realtime] Received ${payload.eventType} event for ${table}:`, payload);
         callback({
           eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
           new: payload.new as T,
@@ -29,10 +33,18 @@ export function subscribeToTable<T>(
         });
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log(`[Realtime] Channel ${channelName} status:`, status);
+      if (status === 'SUBSCRIBED') {
+        console.log(`[Realtime] Successfully subscribed to ${table} for profile ${profileId}`);
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error(`[Realtime] Error subscribing to ${table}:`, channel);
+      }
+    });
 
   // Return cleanup function
   return () => {
+    console.log(`[Realtime] Unsubscribing from ${table} for profile ${profileId}`);
     supabase.removeChannel(channel);
   };
 }
