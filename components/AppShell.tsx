@@ -103,7 +103,7 @@ export default function AppShell({ children }: AppShellProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col pb-20">
       {/* Top Bar */}
       <header className="bg-white border-b border-neutral-200 safe-area-top">
         <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
@@ -131,14 +131,14 @@ export default function AppShell({ children }: AppShellProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pb-20">
         <div className="max-w-[420px] mx-auto min-h-full bg-neutral-50">
           {children}
         </div>
       </main>
 
-      {/* Bottom Tab Bar */}
-      <nav className="bg-white border-t border-neutral-200 safe-area-bottom">
+      {/* Bottom Tab Bar - Fixed to viewport */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 safe-area-bottom z-50">
         <div className="max-w-[420px] mx-auto">
           <div className="flex items-center justify-around py-2">
             {tabs.map((tab) => {
