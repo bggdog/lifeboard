@@ -744,7 +744,7 @@ export default function WorkPage() {
 
             {/* Add Edit Item */}
             <div className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="flex gap-2 mb-3">
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
                 <input
                   type="text"
                   placeholder="Edit title…"
@@ -753,26 +753,28 @@ export default function WorkPage() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAddEditItem();
                   }}
-                  className="flex-1 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="flex-1 min-w-0 px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
                 />
-                <select
-                  value={newEditType}
-                  onChange={(e) => setNewEditType(e.target.value as EditItemType)}
-                  className="px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                  {editTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleAddEditItem}
-                  className="px-6 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add
-                </button>
+                <div className="flex gap-2 flex-shrink-0">
+                  <select
+                    value={newEditType}
+                    onChange={(e) => setNewEditType(e.target.value as EditItemType)}
+                    className="px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
+                  >
+                    {editTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleAddEditItem}
+                    className="px-4 sm:px-6 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-2">
@@ -803,11 +805,11 @@ export default function WorkPage() {
                       isDone ? 'opacity-75' : ''
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 min-w-0">
                           <h3
-                            className={`font-semibold ${
+                            className={`font-semibold truncate ${
                               isDone
                                 ? 'line-through text-neutral-400'
                                 : 'text-neutral-900'
@@ -820,7 +822,7 @@ export default function WorkPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-lg text-xs font-medium">
+                          <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">
                             {item.type === 'short_form'
                               ? 'Short'
                               : item.type === 'long_form'
@@ -830,7 +832,7 @@ export default function WorkPage() {
                           <button
                             onClick={() => handleCycleStatus(item)}
                             disabled={pendingStatusChanges.has(item.id)}
-                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                               pendingStatusChanges.has(item.id)
                                 ? 'opacity-50 cursor-not-allowed'
                                 : ''
@@ -849,7 +851,7 @@ export default function WorkPage() {
                               : 'Queued'}
                           </button>
                           {item.tokens > 0 && (
-                            <span className="px-2 py-0.5 bg-yellow-50 text-yellow-700 rounded-lg text-xs font-medium">
+                            <span className="px-2 py-0.5 bg-yellow-50 text-yellow-700 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">
                               +{item.tokens}
                             </span>
                           )}
@@ -857,7 +859,7 @@ export default function WorkPage() {
                       </div>
                       <button
                         onClick={() => handleDeleteEditItem(item)}
-                        className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 ml-4"
+                        className="flex-shrink-0 p-2 text-neutral-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
                       >
                         {deletingEditId === item.id ? (
                           <X className="w-4 h-4" />
