@@ -937,6 +937,52 @@ export default function TodayPage() {
           </div>
         )}
 
+        {/* Life Areas */}
+        {lifeAreas.length > 0 && (
+          <Card>
+            <SectionHeader title="Life Areas" />
+            <div className="grid grid-cols-2 gap-3">
+              {lifeAreas.map((area) => {
+                const score = lifeAreaScores[area.id];
+                const scoreValue = score?.score ?? 0;
+                const status = score?.status ?? 'At Risk';
+                
+                return (
+                  <div
+                    key={area.id}
+                    className="p-4 rounded-xl bg-neutral-50 border-2 border-transparent"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{area.icon}</span>
+                      <h3 className="font-semibold text-neutral-900 text-sm">{area.name}</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-neutral-900">{scoreValue}</span>
+                        <Pill
+                          variant={
+                            status === 'Excellent'
+                              ? 'success'
+                              : status === 'Good'
+                              ? 'info'
+                              : status === 'Okay'
+                              ? 'warning'
+                              : 'danger'
+                          }
+                          className="text-xs"
+                        >
+                          {status}
+                        </Pill>
+                      </div>
+                      <ProgressBar current={scoreValue} total={100} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
         {/* Empty State */}
         {!loading && habits.length === 0 && todos.length === 0 && workTodos.length === 0 && editItems.length === 0 && (
           <Card>
