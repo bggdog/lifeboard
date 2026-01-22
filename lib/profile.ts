@@ -39,7 +39,7 @@ export async function getOrCreateProfile(): Promise<Profile> {
   // Use session user ID (from authenticated or anonymous auth)
   const profileId = session?.user?.id;
   
-  if (!profileId) {
+  if (!profileId || !session) {
     throw new Error('Could not get user ID from session');
   }
   
