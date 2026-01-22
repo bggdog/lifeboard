@@ -170,22 +170,6 @@ export default function AppShell({ children }: AppShellProps) {
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
       />
-
-      {/* User menu (if authenticated) */}
-      {user?.email && (
-        <div className="fixed bottom-20 right-4 max-w-[420px] mx-auto">
-          <div className="bg-white rounded-xl shadow-lg border border-neutral-200 p-3">
-            <div className="text-xs text-neutral-500 mb-2">Signed in as</div>
-            <div className="text-sm font-medium text-neutral-900 mb-2">{user.email}</div>
-            <button
-              onClick={handleSignOut}
-              className="text-xs text-red-600 hover:text-red-700"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
