@@ -89,7 +89,7 @@ export default function ReviewPage() {
       // Save review with reflection
       await saveWeeklyReview(profileId, weekStart, {
         ...reviewData,
-        reflection: reflection.trim() || null,
+        reflection: reflection.trim() || undefined,
       });
 
       // Mark as completed
