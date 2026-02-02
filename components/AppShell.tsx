@@ -103,10 +103,10 @@ export default function AppShell({ children }: AppShellProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col pb-20 overflow-x-hidden">
-      {/* Top Bar */}
-      <header className="bg-white border-b border-neutral-200 safe-area-top">
-        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between overflow-x-hidden">
+    <div className="h-screen h-[100dvh] bg-neutral-50 flex flex-col overflow-hidden">
+      {/* Top Bar - Sticky */}
+      <header className="bg-white border-b border-neutral-200 safe-area-top flex-shrink-0 sticky top-0 z-40">
+        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between overflow-x-hidden w-full">
           <h1 className="text-xl font-semibold text-neutral-900">LifeOS</h1>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 rounded-full">
@@ -121,7 +121,7 @@ export default function AppShell({ children }: AppShellProps) {
             </div>
             <button
               onClick={() => setShowAuthModal(true)}
-              className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors touch-target"
               title={user?.email || 'Sign in to sync across devices'}
             >
               <User className="w-5 h-5" />
@@ -130,15 +130,15 @@ export default function AppShell({ children }: AppShellProps) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20">
+      {/* Main Content - Scrollable */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
         <div className="max-w-[420px] mx-auto min-h-full bg-neutral-50 w-full">
           {children}
         </div>
       </main>
 
       {/* Bottom Tab Bar - Fixed to viewport */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 safe-area-bottom z-50">
+      <nav className="bg-white border-t border-neutral-200 safe-area-bottom flex-shrink-0 sticky bottom-0 z-50">
         <div className="max-w-[420px] mx-auto">
           <div className="flex items-center justify-around py-2">
             {tabs.map((tab) => {
@@ -149,7 +149,7 @@ export default function AppShell({ children }: AppShellProps) {
                 <button
                   key={tab.path}
                   onClick={() => router.push(tab.path)}
-                  className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-button transition-colors ${
+                  className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-button transition-colors touch-target ${
                     isActive
                       ? 'text-accent'
                       : 'text-neutral-500 hover:text-neutral-700'

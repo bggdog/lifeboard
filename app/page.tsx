@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Plus, Flame } from 'lucide-react';
+import { Check, Plus, Flame, Sparkles, ArrowRight } from 'lucide-react';
 import AppShell from '@/components/AppShell';
 import Card from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -24,6 +24,9 @@ import { fetchLifeAreaScores } from '@/lib/lifeAreaScores';
 import { recomputeAllLifeAreas } from '@/lib/recompute';
 import { supabase } from '@/lib/supabase/client';
 import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
+import { applyPassiveDecay } from '@/lib/lifeDecay';
+import { getLastWeekIncompleteReview } from '@/lib/weeklyReview';
+import { getTimeAwareHeader, getTimeAwareToneClass, getRelativeTimeText } from '@/lib/timeOfDay';
 
 type QuickAddMode = 'todo' | 'work' | 'habit' | 'lift';
 
@@ -55,6 +58,7 @@ export default function TodayPage() {
   const [todayStats, setTodayStats] = useState<{ actions_completed: number; tokens_earned: number; streak: number } | null>(null);
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
+  const [weeklyReviewPending, setWeeklyReviewPending] = useState(false);
 
   // Pending states
   const [pendingToggles, setPendingToggles] = useState<Set<string>>(new Set());
@@ -89,6 +93,15 @@ export default function TodayPage() {
 
         // Ensure default life areas exist
         await createDefaultLifeAreas(profile.id);
+
+        // Apply passive decay (runs once per day)
+        applyPassiveDecay(profile.id).catch((err) => {
+          console.error('Error applying passive decay:', err);
+        });
+
+        // Check for pending weekly review
+        const pendingReview = await getLastWeekIncompleteReview(profile.id);
+        setWeeklyReviewPending(!!pendingReview);
 
         // Fetch all data in parallel
         const [
@@ -482,9 +495,11 @@ export default function TodayPage() {
       const balance = await getTokenBalance(profileId);
       tokenStore.setBalance(balance);
       
-      // Remove if completed
+      // Remove if completed (with slight delay for smooth transition)
       if (newCompleted) {
-        setTodos((prev) => prev.filter((t) => t.id !== todo.id));
+        setTimeout(() => {
+          setTodos((prev) => prev.filter((t) => t.id !== todo.id));
+        }, 200);
       }
     } catch (err: any) {
       // Rollback
@@ -525,9 +540,11 @@ export default function TodayPage() {
       const balance = await getTokenBalance(profileId);
       tokenStore.setBalance(balance);
       
-      // Remove if completed
+      // Remove if completed (with slight delay for smooth transition)
       if (newCompleted) {
-        setWorkTodos((prev) => prev.filter((t) => t.id !== todo.id));
+        setTimeout(() => {
+          setWorkTodos((prev) => prev.filter((t) => t.id !== todo.id));
+        }, 200);
       }
     } catch (err: any) {
       // Rollback
@@ -600,15 +617,43 @@ export default function TodayPage() {
   const tokenOptions = [1, 2, 3, 5];
   const actionsToday = todayStats?.actions_completed ?? 0;
   const goalMet = actionsToday >= 3;
+  const timeAwareTone = getTimeAwareToneClass();
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
+      <div className={`p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden ${timeAwareTone}`}>
+        {/* Calm Open State Header */}
+        <div className={`text-sm text-neutral-400 mb-2 ${
+          timeAwareTone === 'tone-night' ? 'opacity-60' : ''
+        }`}>
+          {getTimeAwareHeader()}
+        </div>
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700 mb-4">
             {error}
           </div>
+        )}
+
+        {/* Weekly Review Banner */}
+        {weeklyReviewPending && (
+          <button
+            onClick={() => router.push('/review')}
+            className="w-full bg-gradient-to-r from-accent to-accent-dark rounded-2xl shadow-sm p-4 mb-4 text-left hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Your weekly review is ready</p>
+                  <p className="text-xs text-white/80 mt-0.5">Reflect on your week</p>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-white" />
+            </div>
+          </button>
         )}
 
         {/* Header / Summary Card */}
@@ -684,16 +729,22 @@ export default function TodayPage() {
                 <div className="flex gap-2">
                   <input
                     type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Weight"
                     value={quickAddWeight}
                     onChange={(e) => setQuickAddWeight(e.target.value)}
+                    enterKeyHint="done"
                     className="flex-1 px-4 py-2 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                   <input
                     type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Reps"
                     value={quickAddReps}
                     onChange={(e) => setQuickAddReps(e.target.value)}
+                    enterKeyHint="done"
                     className="flex-1 px-4 py-2 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 </div>
@@ -722,6 +773,7 @@ export default function TodayPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleQuickAdd();
                 }}
+                enterKeyHint="done"
                 className="flex-1 min-w-0 px-4 py-2 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
               />
               <div className="flex gap-2 items-center flex-shrink-0">
@@ -777,17 +829,24 @@ export default function TodayPage() {
                     key={habit.id}
                     onClick={() => handleToggleHabit(habit)}
                     disabled={pendingToggles.has(habit.id)}
-                    className={`p-3 rounded-xl text-left transition-all ${
+                    className={`p-3 rounded-xl text-left transition-all duration-120 touch-target ${
                       isCompleted
                         ? 'bg-green-50 border-2 border-green-200'
                         : 'bg-neutral-50 border-2 border-transparent hover:border-accent'
                     } disabled:opacity-50`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-neutral-900 line-clamp-1">
-                        {habit.title}
-                      </span>
-                      {isCompleted && <Check className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-neutral-900 line-clamp-1 block">
+                          {habit.title}
+                        </span>
+                        {isCompleted && (
+                          <span className="text-xs text-neutral-400 mt-0.5 block">completed today</span>
+                        )}
+                      </div>
+                      {isCompleted && (
+                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 completion-feedback" />
+                      )}
                     </div>
                     {habit.tokens > 0 && (
                       <Pill variant="warning" size="sm">
@@ -819,24 +878,35 @@ export default function TodayPage() {
                 />
                 <div className="space-y-2">
                   {todos.slice(0, 5).map((todo) => (
-                    <div
+                    <button
                       key={todo.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50"
+                      onClick={() => handleToggleTodo(todo)}
+                      disabled={pendingToggles.has(todo.id)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-all duration-150 w-full text-left touch-target min-h-[44px]"
                     >
-                      <button
-                        onClick={() => handleToggleTodo(todo)}
-                        disabled={pendingToggles.has(todo.id)}
-                        className="flex-shrink-0 w-5 h-5 rounded border-2 border-neutral-300 flex items-center justify-center disabled:opacity-50"
+                      <div
+                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-120 ${
+                          todo.completed 
+                            ? 'border-green-300 bg-green-50 scale-100' 
+                            : 'border-neutral-300 scale-95'
+                        }`}
                       >
-                        {todo.completed && <Check className="w-3 h-3 text-accent" />}
-                      </button>
-                      <span className="flex-1 text-sm text-neutral-900">{todo.title}</span>
+                        {todo.completed && (
+                          <Check className="w-3 h-3 text-accent completion-feedback" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-neutral-900 block">{todo.title}</span>
+                        <span className="text-xs text-neutral-400 mt-0.5 block">
+                          {getRelativeTimeText(todo.created_at)}
+                        </span>
+                      </div>
                       {todo.tokens > 0 && (
-                        <Pill variant="warning" size="sm">
+                        <Pill variant="warning" size="sm" className="flex-shrink-0">
                           +{todo.tokens}
                         </Pill>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </Card>
@@ -857,24 +927,37 @@ export default function TodayPage() {
                 />
                 <div className="space-y-2">
                   {workTodos.slice(0, 5).map((todo) => (
-                    <div
+                    <button
                       key={todo.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50"
+                      onClick={() => handleToggleWorkTodo(todo)}
+                      disabled={pendingToggles.has(todo.id)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-all duration-150 w-full text-left touch-target min-h-[44px]"
                     >
-                      <button
-                        onClick={() => handleToggleWorkTodo(todo)}
-                        disabled={pendingToggles.has(todo.id)}
-                        className="flex-shrink-0 w-5 h-5 rounded border-2 border-neutral-300 flex items-center justify-center disabled:opacity-50"
+                      <div
+                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-120 ${
+                          todo.completed 
+                            ? 'border-green-300 bg-green-50 scale-100' 
+                            : 'border-neutral-300 scale-95'
+                        }`}
                       >
-                        {todo.completed && <Check className="w-3 h-3 text-accent" />}
-                      </button>
-                      <span className="flex-1 text-sm text-neutral-900">{todo.title}</span>
+                        {todo.completed && (
+                          <Check className="w-3 h-3 text-accent completion-feedback" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-neutral-900 block">{todo.title}</span>
+                        <span className="text-xs text-neutral-400 mt-0.5 block">
+                          {todo.completed_at 
+                            ? getRelativeTimeText(todo.completed_at)
+                            : getRelativeTimeText(todo.created_at)}
+                        </span>
+                      </div>
                       {todo.tokens > 0 && (
-                        <Pill variant="warning" size="sm">
+                        <Pill variant="warning" size="sm" className="flex-shrink-0">
                           +{todo.tokens}
                         </Pill>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </Card>
@@ -900,24 +983,35 @@ export default function TodayPage() {
               {editItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-50 min-w-0"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-50 min-w-0 transition-all duration-150"
                 >
-                  <span className="flex-1 text-sm text-neutral-900 truncate min-w-0">{item.title}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm text-neutral-900 truncate block">{item.title}</span>
+                    <span className="text-xs text-neutral-400 mt-0.5 block">
+                      {getRelativeTimeText(item.created_at)}
+                    </span>
+                  </div>
                   <Pill variant="neutral" size="sm" className="flex-shrink-0">
                     {item.type === 'short_form' ? 'Short' : item.type === 'long_form' ? 'Long' : 'Episode'}
                   </Pill>
                   <button
                     onClick={() => handleCycleEditStatus(item)}
                     disabled={pendingToggles.has(item.id)}
-                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0 ${
-                      item.status === 'done'
-                        ? 'bg-green-100 text-green-700'
-                        : item.status === 'in_progress'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-neutral-100 text-neutral-600'
-                    }`}
+                    className="flex-shrink-0"
                   >
-                    {item.status === 'done' ? 'Done' : item.status === 'in_progress' ? 'In Progress' : 'Queued'}
+                    <Pill
+                      variant={
+                        item.status === 'done'
+                          ? 'success'
+                          : item.status === 'in_progress'
+                          ? 'accent'
+                          : 'neutral'
+                      }
+                      size="sm"
+                      className="whitespace-nowrap transition-all duration-120 disabled:opacity-50"
+                    >
+                      {item.status === 'done' ? 'Done' : item.status === 'in_progress' ? 'In Progress' : 'Queued'}
+                    </Pill>
                   </button>
                 </div>
               ))}
@@ -983,13 +1077,13 @@ export default function TodayPage() {
           </Card>
         )}
 
-        {/* Empty State */}
-        {!loading && habits.length === 0 && todos.length === 0 && workTodos.length === 0 && editItems.length === 0 && (
-          <Card>
-            <p className="text-center text-neutral-500 py-4">
-              Get started by adding a habit or todo above!
+        {/* Empty State - Only show if truly nothing exists, very subtle */}
+        {!loading && habits.length === 0 && todos.length === 0 && workTodos.length === 0 && editItems.length === 0 && lifeAreas.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-sm text-neutral-400">
+              Start by adding something above.
             </p>
-          </Card>
+          </div>
         )}
       </div>
     </AppShell>

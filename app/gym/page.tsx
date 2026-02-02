@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import BottomSheet from '@/components/ui/BottomSheet';
 import { getOrCreateProfile } from '@/lib/profile';
 import { fetchLifts, createLift, type Lift } from '@/lib/gym/lifts';
 import { fetchRecentSetsForLifts, createSet, deleteSet, type GymSet } from '@/lib/gym/sets';
@@ -432,97 +433,93 @@ export default function GymPage() {
         )}
 
         {/* Log Set Bottom Sheet */}
-        {loggingForLift && (
-          <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-            <div className="bg-white rounded-t-3xl shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-neutral-900">
-                  Log Set: {loggingForLift.name}
-                </h2>
-                <button
-                  onClick={() => {
-                    setLoggingForLift(null);
-                    setSetWeight('');
-                    setSetReps('');
-                    setSetNotes('');
-                  }}
-                  className="p-2 text-neutral-400 hover:text-neutral-600 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <BottomSheet
+          isOpen={!!loggingForLift}
+          onClose={() => {
+            setLoggingForLift(null);
+            setSetWeight('');
+            setSetReps('');
+            setSetNotes('');
+          }}
+          title={loggingForLift ? `Log Set: ${loggingForLift.name}` : ''}
+          footer={
+            <div className="flex gap-2">
+              <button
+                onClick={handleLogSet}
+                disabled={pendingSetLog}
+                className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {pendingSetLog ? 'Saving...' : 'Save Set'}
+              </button>
+              <button
+                onClick={() => {
+                  setLoggingForLift(null);
+                  setSetWeight('');
+                  setSetReps('');
+                  setSetNotes('');
+                }}
+                className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Weight (lbs)
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="225"
+                value={setWeight}
+                onChange={(e) => setSetWeight(e.target.value)}
+                enterKeyHint="next"
+                className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                autoFocus
+              />
+            </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Weight (lbs)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="225"
-                    value={setWeight}
-                    onChange={(e) => setSetWeight(e.target.value)}
-                    className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                    autoFocus
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Reps
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="5"
+                value={setReps}
+                onChange={(e) => setSetReps(e.target.value)}
+                enterKeyHint="done"
+                className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Reps
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="5"
-                    value={setReps}
-                    onChange={(e) => setSetReps(e.target.value)}
-                    className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Notes (optional)
+              </label>
+              <textarea
+                placeholder="How did it feel?"
+                value={setNotes}
+                onChange={(e) => setSetNotes(e.target.value)}
+                rows={3}
+                enterKeyHint="done"
+                className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+              />
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Notes (optional)
-                  </label>
-                  <textarea
-                    placeholder="How did it feel?"
-                    value={setNotes}
-                    onChange={(e) => setSetNotes(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-xl">
-                  <span className="text-sm font-medium text-yellow-700">
-                    +1 token
-                  </span>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={handleLogSet}
-                    disabled={pendingSetLog}
-                    className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {pendingSetLog ? 'Saving...' : 'Save Set'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setLoggingForLift(null);
-                      setSetWeight('');
-                      setSetReps('');
-                      setSetNotes('');
-                    }}
-                    className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-xl">
+              <span className="text-sm font-medium text-yellow-700">
+                +1 token
+              </span>
             </div>
           </div>
-        )}
+        </BottomSheet>
       </div>
     </AppShell>
   );
