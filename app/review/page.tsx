@@ -87,13 +87,13 @@ export default function ReviewPage() {
       const { weekStart } = getWeekRange(lastWeek);
 
       // Save review with reflection
-      await saveWeeklyReview(profile.id, weekStart, {
+      await saveWeeklyReview(profileId, weekStart, {
         ...reviewData,
         reflection: reflection.trim() || null,
       });
 
       // Mark as completed
-      await completeWeeklyReview(profile.id, weekStart);
+      await completeWeeklyReview(profileId, weekStart);
 
       setCompleted(true);
 
