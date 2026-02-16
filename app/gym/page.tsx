@@ -432,7 +432,7 @@ export default function GymPage() {
           </div>
         )}
 
-        {/* Log Set Bottom Sheet */}
+        {/* Log Set Bottom Sheet - actions at top so Save is always visible on mobile */}
         <BottomSheet
           isOpen={!!loggingForLift}
           onClose={() => {
@@ -442,12 +442,14 @@ export default function GymPage() {
             setSetNotes('');
           }}
           title={loggingForLift ? `Log Set: ${loggingForLift.name}` : ''}
-          footer={
-            <div className="flex gap-2">
+        >
+          <div className="space-y-4">
+            {/* Primary actions first so always visible without scrolling */}
+            <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={handleLogSet}
                 disabled={pendingSetLog}
-                className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] touch-manipulation"
               >
                 {pendingSetLog ? 'Saving...' : 'Save Set'}
               </button>
@@ -458,14 +460,12 @@ export default function GymPage() {
                   setSetReps('');
                   setSetNotes('');
                 }}
-                className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors min-h-[44px]"
+                className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors min-h-[48px] touch-manipulation"
               >
                 Cancel
               </button>
             </div>
-          }
-        >
-          <div className="space-y-4">
+
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Weight (lbs)
@@ -507,7 +507,7 @@ export default function GymPage() {
                 placeholder="How did it feel?"
                 value={setNotes}
                 onChange={(e) => setSetNotes(e.target.value)}
-                rows={3}
+                rows={2}
                 enterKeyHint="done"
                 className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
               />

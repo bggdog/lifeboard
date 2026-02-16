@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User } from 'lucide-react';
+import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User, FileCheck, Menu, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { tokenStore } from '@/lib/tokenStore';
 import { getTokenBalance } from '@/lib/tokens';
@@ -14,14 +14,24 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
+const navItems = [
+  { path: '/', icon: Home, label: 'Dashboard' },
+  { path: '/todo', icon: CheckSquare, label: 'To Do' },
+  { path: '/habits', icon: Target, label: 'Habits' },
+  { path: '/work', icon: Briefcase, label: 'Work' },
+  { path: '/gym', icon: Dumbbell, label: 'Gym' },
+  { path: '/game', icon: Trophy, label: 'Game' },
+  { path: '/review', icon: FileCheck, label: 'Review' },
+];
+
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  // Initialize with current tokenStore balance (if available)
   const [tokenBalance, setTokenBalance] = useState<number>(tokenStore.getBalance());
   const [level, setLevel] = useState<number>(1);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Subscribe to token store and load balance on mount and navigation
   useEffect(() => {
@@ -93,76 +103,144 @@ export default function AppShell({ children }: AppShellProps) {
     window.location.reload();
   };
 
-  const tabs = [
-    { path: '/', icon: Home, label: 'Today' },
-    { path: '/todo', icon: CheckSquare, label: 'To Do' },
-    { path: '/habits', icon: Target, label: 'Habits' },
-    { path: '/work', icon: Briefcase, label: 'Work' },
-    { path: '/gym', icon: Dumbbell, label: 'Gym' },
-    { path: '/game', icon: Trophy, label: 'Game' },
-  ];
-
   return (
-    <div className="h-screen h-[100dvh] bg-neutral-50 flex flex-col overflow-hidden">
-      {/* Top Bar - Sticky */}
-      <header className="bg-white border-b border-neutral-200 safe-area-top flex-shrink-0 sticky top-0 z-40">
-        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between overflow-x-hidden w-full">
-          <h1 className="text-xl font-semibold text-neutral-900">LifeOS</h1>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 rounded-full">
-              <span className="text-xs font-medium text-neutral-600">Lv</span>
-              <span className="text-sm font-semibold text-neutral-900">{level}</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-full">
-              <span className="text-lg">🪙</span>
-              <span className="text-sm font-semibold text-neutral-900">
-                {tokenBalance}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors touch-target"
-              title={user?.email || 'Sign in to sync across devices'}
-            >
-              <User className="w-5 h-5" />
-            </button>
-          </div>
+    <div className="h-screen h-[100dvh] bg-neutral-50 flex flex-col lg:flex-row overflow-hidden">
+      {/* ========== DESKTOP: Left Sidebar ========== */}
+      <aside
+        className={`hidden lg:flex flex-col flex-shrink-0 bg-white border-r border-neutral-200 transition-[width] duration-200 ${
+          sidebarOpen ? 'w-64' : 'w-20'
+        }`}
+      >
+        <div className="p-4 border-b border-neutral-200 flex items-center justify-between flex-shrink-0">
+          {sidebarOpen ? (
+            <h1 className="text-xl font-semibold text-accent">LifeOS</h1>
+          ) : (
+            <span className="text-lg font-bold text-accent">L</span>
+          )}
+          <button
+            onClick={() => setSidebarOpen((o) => !o)}
+            className="p-2 text-neutral-500 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
-      </header>
-
-      {/* Main Content - Scrollable */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
-        <div className="max-w-[420px] mx-auto min-h-full bg-neutral-50 w-full">
-          {children}
-        </div>
-      </main>
-
-      {/* Bottom Tab Bar - Fixed to viewport */}
-      <nav className="bg-white border-t border-neutral-200 safe-area-bottom flex-shrink-0 sticky bottom-0 z-50">
-        <div className="max-w-[420px] mx-auto">
-          <div className="flex items-center justify-around py-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = pathname === tab.path;
-              
+        <div className="p-3 flex-1 overflow-y-auto">
+          {sidebarOpen ? (
+            <div className="mb-4 p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-accent" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-neutral-900 truncate">
+                    {user?.email ? user.email.split('@')[0] : 'Guest'}
+                  </p>
+                  <p className="text-xs text-neutral-500">Lv {level}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center mb-4">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-accent" />
+              </div>
+            </div>
+          )}
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.path;
               return (
                 <button
-                  key={tab.path}
-                  onClick={() => router.push(tab.path)}
-                  className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-button transition-colors touch-target ${
+                  key={item.path}
+                  onClick={() => router.push(item.path)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                     isActive
-                      ? 'text-accent'
-                      : 'text-neutral-500 hover:text-neutral-700'
+                      ? 'bg-accent/10 text-accent font-medium'
+                      : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{tab.label}</span>
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {sidebarOpen && <span className="text-sm truncate">{item.label}</span>}
                 </button>
               );
             })}
-          </div>
+          </nav>
         </div>
-      </nav>
+      </aside>
+
+      {/* ========== DESKTOP: Top Header + Main ========== */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar - Mobile: narrow | Desktop: full width with search */}
+        <header className="bg-white border-b border-neutral-200 safe-area-top flex-shrink-0 sticky top-0 z-40">
+          <div className="max-w-[420px] lg:max-w-none mx-auto px-4 py-3 flex items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <h1 className="text-xl font-semibold text-neutral-900 lg:hidden">LifeOS</h1>
+              <div className="hidden lg:flex items-center gap-2 flex-1 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="search"
+                    placeholder="Search tasks, habits..."
+                    className="w-full pl-9 pr-4 py-2 bg-neutral-100 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 rounded-full">
+                <span className="text-xs font-medium text-neutral-600">Lv</span>
+                <span className="text-sm font-semibold text-neutral-900">{level}</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-full">
+                <span className="text-lg">🪙</span>
+                <span className="text-sm font-semibold text-neutral-900">{tokenBalance}</span>
+              </div>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors touch-target rounded-lg hover:bg-neutral-100"
+                title={user?.email || 'Sign in to sync across devices'}
+              >
+                <User className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content - Scrollable; desktop uses full width */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
+          <div className="max-w-[420px] lg:max-w-6xl lg:px-6 lg:py-6 mx-auto min-h-full bg-neutral-50 w-full">
+            {children}
+          </div>
+        </main>
+
+        {/* Bottom Tab Bar - Mobile only */}
+        <nav className="lg:hidden bg-white border-t border-neutral-200 safe-area-bottom flex-shrink-0 sticky bottom-0 z-50">
+          <div className="max-w-[420px] mx-auto">
+            <div className="flex items-center justify-around py-2">
+              {navItems.filter((t) => t.path !== '/review').map((tab) => {
+                const Icon = tab.icon;
+                const isActive = pathname === tab.path;
+                const label = tab.path === '/' ? 'Today' : tab.label;
+                return (
+                  <button
+                    key={tab.path}
+                    onClick={() => router.push(tab.path)}
+                    className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-button transition-colors touch-target ${
+                      isActive ? 'text-accent' : 'text-neutral-500 hover:text-neutral-700'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-xs font-medium">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
+      </div>
 
       {/* Auth Modal */}
       <AuthModal

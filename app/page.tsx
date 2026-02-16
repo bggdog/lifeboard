@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Plus, Flame, Sparkles, ArrowRight } from 'lucide-react';
+import { Check, Plus, Flame, Sparkles, ArrowRight, Home } from 'lucide-react';
 import AppShell from '@/components/AppShell';
 import Card from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -621,7 +621,7 @@ export default function TodayPage() {
 
   return (
     <AppShell>
-      <div className={`p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden ${timeAwareTone}`}>
+      <div className={`p-4 sm:p-6 space-y-4 pb-24 lg:pb-6 overflow-x-hidden ${timeAwareTone}`}>
         {/* Calm Open State Header */}
         <div className={`text-sm text-neutral-400 mb-2 ${
           timeAwareTone === 'tone-night' ? 'opacity-60' : ''
@@ -634,6 +634,44 @@ export default function TodayPage() {
             {error}
           </div>
         )}
+
+        {/* Desktop-only: Dashboard title + KPI cards */}
+        <div className="hidden lg:block mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Home className="w-4 h-4 text-accent" />
+              </div>
+              <h1 className="text-2xl font-semibold text-neutral-900">Dashboard</h1>
+            </div>
+            <span className="text-sm text-accent font-medium">Overview</span>
+          </div>
+        </div>
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4 mb-6">
+          <div className="rounded-2xl bg-gradient-to-br from-accent to-accent-dark p-5 text-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <p className="text-sm font-medium text-white/90">Level</p>
+            <p className="text-2xl font-bold mt-1">{level}</p>
+          </div>
+          <div className="rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-5 text-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <p className="text-sm font-medium text-white/90">Actions today</p>
+            <p className="text-2xl font-bold mt-1">{actionsToday} / 3</p>
+            <p className="text-xs text-white/80 mt-1">{goalMet ? 'Goal met' : 'Keep going'}</p>
+          </div>
+          <div className="rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 p-5 text-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <p className="text-sm font-medium text-white/90">Daily streak</p>
+            <p className="text-2xl font-bold mt-1">{todayStats?.streak ?? 0}</p>
+            <p className="text-xs text-white/80 mt-1">days</p>
+          </div>
+          <div className="rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 p-5 text-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <p className="text-sm font-medium text-white/90">Tokens today</p>
+            <p className="text-2xl font-bold mt-1">+{todayStats?.tokens_earned ?? 0}</p>
+            <p className="text-xs text-white/80 mt-1">earned</p>
+          </div>
+        </div>
 
         {/* Weekly Review Banner */}
         {weeklyReviewPending && (

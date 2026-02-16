@@ -62,7 +62,7 @@ export default function BottomSheet({
         <div
           ref={sheetRef}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col safe-area-bottom bottom-sheet-content"
+          className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[85dvh] flex flex-col safe-area-bottom bottom-sheet-content"
         >
         {/* Header */}
         {(title || true) && (
@@ -79,14 +79,14 @@ export default function BottomSheet({
           </div>
         )}
 
-        {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto scroll-container px-6 py-4">
+        {/* Content - Scrollable; min-h-0 so flex child can shrink and footer stays visible */}
+        <div className="flex-1 min-h-0 overflow-y-auto scroll-container px-6 py-4">
           {children}
         </div>
 
-        {/* Footer */}
+        {/* Footer - always visible at bottom of sheet */}
         {footer && (
-          <div className="border-t border-neutral-200 px-6 py-4 flex-shrink-0 safe-area-bottom">
+          <div className="border-t border-neutral-200 px-6 py-4 flex-shrink-0 bg-white safe-area-bottom">
             {footer}
           </div>
         )}
