@@ -1202,6 +1202,7 @@ export default function WorkPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </AppShell>
   );
