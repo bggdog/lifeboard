@@ -852,81 +852,6 @@ export default function WorkPage() {
                 </div>
               )}
             </div>
-
-            {/* Note Editor Modal */}
-            {editingNote !== null && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-neutral-900">
-                      {editingNote.id ? 'Edit Note' : 'New Note'}
-                    </h2>
-                    <button
-                      onClick={() => setEditingNote(null)}
-                      className="p-2 text-neutral-400 hover:text-neutral-600 rounded-lg"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      placeholder="Title"
-                      value={editingNote.title || ''}
-                      onChange={(e) =>
-                        setEditingNote({ ...editingNote, title: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                    />
-
-                    <textarea
-                      placeholder="Body"
-                      value={editingNote.body || ''}
-                      onChange={(e) =>
-                        setEditingNote({ ...editingNote, body: e.target.value })
-                      }
-                      rows={8}
-                      className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                    />
-
-                    <select
-                      value={editingNote.category_id || ''}
-                      onChange={(e) =>
-                        setEditingNote({
-                          ...editingNote,
-                          category_id: e.target.value || null,
-                        })
-                      }
-                      className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
-                    >
-                      <option value="">No Category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleSaveNote(editingNote)}
-                        className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingNote(null)}
-                        className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -1203,6 +1128,81 @@ export default function WorkPage() {
           </div>
         )}
         </div>
+
+        {/* Note Editor Modal - shared across desktop and mobile */}
+        {editingNote !== null && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
+            <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-neutral-900">
+                  {editingNote.id ? 'Edit Note' : 'New Note'}
+                </h2>
+                <button
+                  onClick={() => setEditingNote(null)}
+                  className="p-2 text-neutral-400 hover:text-neutral-600 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Title"
+                  value={editingNote.title || ''}
+                  onChange={(e) =>
+                    setEditingNote({ ...editingNote, title: e.target.value })
+                  }
+                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+
+                <textarea
+                  placeholder="Body"
+                  value={editingNote.body || ''}
+                  onChange={(e) =>
+                    setEditingNote({ ...editingNote, body: e.target.value })
+                  }
+                  rows={8}
+                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                />
+
+                <select
+                  value={editingNote.category_id || ''}
+                  onChange={(e) =>
+                    setEditingNote({
+                      ...editingNote,
+                      category_id: e.target.value || null,
+                    })
+                  }
+                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <option value="">No Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleSaveNote(editingNote)}
+                    className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingNote(null)}
+                    className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );
