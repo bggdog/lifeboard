@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User, FileCheck, Menu, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { tokenStore } from '@/lib/tokenStore';
 import { getTokenBalance } from '@/lib/tokens';
 import { getOrCreateProfile } from '@/lib/profile';
@@ -27,6 +28,7 @@ const navItems = [
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [tokenBalance, setTokenBalance] = useState<number>(tokenStore.getBalance());
   const [level, setLevel] = useState<number>(1);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
@@ -104,10 +106,11 @@ export default function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="h-screen h-[100dvh] bg-neutral-50 flex flex-col lg:flex-row overflow-hidden">
+    <div className={`h-screen h-[100dvh] bg-neutral-50 overflow-hidden ${isDesktop ? 'flex flex-row' : 'flex flex-col'}`}>
       {/* ========== DESKTOP: Left Sidebar ========== */}
+      {isDesktop && (
       <aside
-        className={`hidden lg:flex flex-col flex-shrink-0 bg-white border-r border-neutral-200 transition-[width] duration-200 ${
+        className={`flex flex-col flex-shrink-0 bg-white border-r border-neutral-200 transition-[width] duration-200 ${
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
@@ -169,25 +172,28 @@ export default function AppShell({ children }: AppShellProps) {
           </nav>
         </div>
       </aside>
+      )}
 
-      {/* ========== DESKTOP: Top Header + Main ========== */}
+      {/* ========== Top Header + Main ========== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar - Mobile: narrow | Desktop: full width with search */}
         <header className="bg-white border-b border-neutral-200 safe-area-top flex-shrink-0 sticky top-0 z-40">
-          <div className="max-w-[420px] lg:max-w-none mx-auto px-4 py-3 flex items-center justify-between gap-4 w-full">
+          <div className={`${isDesktop ? 'max-w-none' : 'max-w-[420px]'} mx-auto px-4 py-3 flex items-center justify-between gap-4 w-full`}>
             <div className="flex items-center gap-3 min-w-0">
-              <h1 className="text-xl font-semibold text-neutral-900 lg:hidden">LifeOS</h1>
-              <div className="hidden lg:flex items-center gap-2 flex-1 max-w-md">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="search"
-                    placeholder="Search tasks, habits..."
-                    className="w-full pl-9 pr-4 py-2 bg-neutral-100 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                    readOnly
-                  />
+              {!isDesktop && <h1 className="text-xl font-semibold text-neutral-900">LifeOS</h1>}
+              {isDesktop && (
+                <div className="flex items-center gap-2 flex-1 max-w-md">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="search"
+                      placeholder="Search tasks, habits..."
+                      className="w-full pl-9 pr-4 py-2 bg-neutral-100 rounded-xl border-0 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
+                      readOnly
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 rounded-full">
@@ -211,13 +217,14 @@ export default function AppShell({ children }: AppShellProps) {
 
         {/* Main Content - Scrollable; desktop uses full width */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
-          <div className="max-w-[420px] lg:max-w-6xl lg:px-6 lg:py-6 mx-auto min-h-full bg-neutral-50 w-full">
+          <div className={`${isDesktop ? 'max-w-6xl px-6 py-6' : 'max-w-[420px]'} mx-auto min-h-full bg-neutral-50 w-full`}>
             {children}
           </div>
         </main>
 
         {/* Bottom Tab Bar - Mobile only */}
-        <nav className="lg:hidden bg-white border-t border-neutral-200 safe-area-bottom flex-shrink-0 sticky bottom-0 z-50">
+        {!isDesktop && (
+        <nav className="bg-white border-t border-neutral-200 safe-area-bottom flex-shrink-0 sticky bottom-0 z-50">
           <div className="max-w-[420px] mx-auto">
             <div className="flex items-center justify-around py-2">
               {navItems.filter((t) => t.path !== '/review').map((tab) => {
@@ -240,6 +247,7 @@ export default function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         </nav>
+        )}
       </div>
 
       {/* Auth Modal */}
