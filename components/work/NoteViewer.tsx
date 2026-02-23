@@ -64,8 +64,9 @@ export default function NoteViewer({
                   {children}
                 </blockquote>
               ),
-              code: ({ inline, className, children, ...props }) =>
-                inline ? (
+              code: ({ className, children, ...props }) => {
+                const isInline = !className;
+                return isInline ? (
                   <code className="bg-neutral-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
                     {children}
                   </code>
@@ -73,7 +74,8 @@ export default function NoteViewer({
                   <pre className="bg-neutral-100 p-4 rounded-xl overflow-x-auto text-sm my-4">
                     <code {...props}>{children}</code>
                   </pre>
-                ),
+                );
+              },
             }}
           >
             {body || '*No content*'}
