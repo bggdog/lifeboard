@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User, FileCheck, Menu, Search } from 'lucide-react';
+import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User, FileCheck, Menu, Search, Coins } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { tokenStore } from '@/lib/tokenStore';
@@ -201,7 +201,7 @@ export default function AppShell({ children }: AppShellProps) {
                 <span className="text-sm font-semibold text-neutral-900">{level}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-full">
-                <span className="text-lg">🪙</span>
+                <Coins className="w-5 h-5 text-amber-500" />
                 <span className="text-sm font-semibold text-neutral-900">{tokenBalance}</span>
               </div>
               <button

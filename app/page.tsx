@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Plus, Flame, Sparkles, ArrowRight, Home } from 'lucide-react';
+import { Check, Plus, Flame, Sparkles, ArrowRight, Home, Coins } from 'lucide-react';
 import AppShell from '@/components/AppShell';
 import Card from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -715,7 +715,7 @@ export default function TodayPage() {
               )}
               {todayStats && todayStats.tokens_earned > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm">🪙</span>
+                  <Coins className="w-4 h-4 text-amber-500" />
                   <span className="text-sm font-medium text-neutral-900">
                     +{todayStats.tokens_earned} today
                   </span>

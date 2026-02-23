@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Gift, Flame } from 'lucide-react';
+import { Plus, Gift, Flame, Coins } from 'lucide-react';
 import AppShell from '@/components/AppShell';
 import { getOrCreateProfile } from '@/lib/profile';
 import { getTokenBalance } from '@/lib/tokens';
@@ -227,7 +227,7 @@ export default function GamePage() {
                   <h2 className="text-4xl font-bold text-neutral-900">{level}</h2>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 rounded-full">
-                  <span className="text-lg">🪙</span>
+                  <Coins className="w-5 h-5 text-amber-500" />
                   <span className="text-sm font-semibold text-yellow-700">
                     {tokenBalance}
                   </span>
@@ -391,8 +391,9 @@ export default function GamePage() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-sm text-neutral-600">
-                          -{redemption.cost_tokens} 🪙
+                        <span className="text-sm text-neutral-600 flex items-center gap-1">
+                          -{redemption.cost_tokens}
+                          <Coins className="w-4 h-4 text-amber-500" />
                         </span>
                       </div>
                     );
