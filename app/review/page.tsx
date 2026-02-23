@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowRight, Sparkles } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import Card from '@/components/ui/Card';
 import { getOrCreateProfile } from '@/lib/profile';
 import { applyPassiveDecay } from '@/lib/lifeDecay';
@@ -155,7 +156,7 @@ export default function ReviewPage() {
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
+      <AnimateStagger className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
         {/* Intro Card */}
         <Card>
           <div className="text-center">
@@ -274,7 +275,7 @@ export default function ReviewPage() {
             )}
           </button>
         )}
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Home, CheckSquare, Target, Briefcase, Dumbbell, Trophy, User, FileCheck, Menu, Search, Coins } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -218,7 +219,14 @@ export default function AppShell({ children }: AppShellProps) {
         {/* Main Content - Scrollable; desktop uses full width */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
           <div className={`${isDesktop ? 'max-w-7xl px-6 py-6' : 'max-w-[420px]'} mx-auto min-h-full bg-neutral-50 w-full`}>
-            {children}
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
           </div>
         </main>
 

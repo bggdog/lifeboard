@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import { getOrCreateProfile } from '@/lib/profile';
 import {
   fetchHabits,
@@ -328,7 +329,7 @@ export default function HabitsPage() {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-4">
+      <AnimateStagger className="p-6 space-y-4">
         {/* Header Card */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Habits</h1>
@@ -560,7 +561,7 @@ export default function HabitsPage() {
             })}
           </div>
         )}
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

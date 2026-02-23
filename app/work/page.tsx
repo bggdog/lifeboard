@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Check, Trash2, Edit2, Briefcase, FileText } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import NoteEditor from '@/components/work/NoteEditor';
 import NoteViewer from '@/components/work/NoteViewer';
 import { getOrCreateProfile } from '@/lib/profile';
@@ -366,7 +367,7 @@ export default function WorkPage() {
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-6 space-y-4 pb-24 lg:pb-6">
+      <AnimateStagger className="p-4 sm:p-6 space-y-4 pb-24 lg:pb-6">
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700 mb-4">
@@ -1147,7 +1148,7 @@ export default function WorkPage() {
         )}
         </div>
 
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

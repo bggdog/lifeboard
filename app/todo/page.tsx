@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import { getOrCreateProfile } from '@/lib/profile';
 import {
   fetchTodos,
@@ -214,7 +215,7 @@ export default function TodoPage() {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-4">
+      <AnimateStagger className="p-6 space-y-4">
         {/* Header Card */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">To Do</h1>
@@ -352,7 +353,7 @@ export default function TodoPage() {
             ))}
           </div>
         )}
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

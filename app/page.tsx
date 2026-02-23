@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Plus, Flame, Sparkles, ArrowRight, Home, Coins } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import Card from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Pill from '@/components/ui/Pill';
@@ -621,7 +622,7 @@ export default function TodayPage() {
 
   return (
     <AppShell>
-      <div className={`p-4 sm:p-6 space-y-4 pb-24 lg:pb-6 overflow-x-hidden ${timeAwareTone}`}>
+      <AnimateStagger className={`p-4 sm:p-6 space-y-4 pb-24 lg:pb-6 overflow-x-hidden ${timeAwareTone}`}>
         {/* Calm Open State Header */}
         <div className={`text-sm text-neutral-400 mb-2 ${
           timeAwareTone === 'tone-night' ? 'opacity-60' : ''
@@ -1123,7 +1124,7 @@ export default function TodayPage() {
             </p>
           </div>
         )}
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

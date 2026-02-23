@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import AnimateStagger from '@/components/ui/AnimateStagger';
 import BottomSheet from '@/components/ui/BottomSheet';
 import { getOrCreateProfile } from '@/lib/profile';
 import { fetchLifts, createLift, type Lift } from '@/lib/gym/lifts';
@@ -253,7 +254,7 @@ export default function GymPage() {
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
+      <AnimateStagger className="p-4 sm:p-6 space-y-4 pb-24 overflow-x-hidden">
         {/* Header Card */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Gym</h1>
@@ -520,7 +521,7 @@ export default function GymPage() {
             </div>
           </div>
         </BottomSheet>
-      </div>
+      </AnimateStagger>
     </AppShell>
   );
 }

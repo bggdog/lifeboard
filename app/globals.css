@@ -50,6 +50,18 @@ a {
   touch-action: manipulation;
 }
 
+/* Tap/click interaction feedback - subtle press effect */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a {
+  transition: transform 0.12s ease-out;
+}
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active,
+a:active {
+  transform: scale(0.97);
+}
+
 /* Prevent text selection on interactive elements */
 button,
 [role="button"],
