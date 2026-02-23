@@ -217,7 +217,7 @@ export default function AppShell({ children }: AppShellProps) {
 
         {/* Main Content - Scrollable; desktop uses full width */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-container">
-          <div className={`${isDesktop ? 'max-w-6xl px-6 py-6' : 'max-w-[420px]'} mx-auto min-h-full bg-neutral-50 w-full`}>
+          <div className={`${isDesktop ? 'max-w-7xl px-6 py-6' : 'max-w-[420px]'} mx-auto min-h-full bg-neutral-50 w-full`}>
             {children}
           </div>
         </main>
