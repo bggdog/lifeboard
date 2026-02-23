@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, X, Check, Trash2, Edit2, Save, Briefcase } from 'lucide-react';
+import { Plus, X, Check, Trash2, Edit2, Briefcase, FileText } from 'lucide-react';
 import AppShell from '@/components/AppShell';
+import NoteEditor from '@/components/work/NoteEditor';
+import NoteViewer from '@/components/work/NoteViewer';
 import { getOrCreateProfile } from '@/lib/profile';
 import { fetchCategories, createCategory, deleteCategory, type WorkNoteCategory } from '@/lib/work/categories';
 import { fetchNotes, createNote, updateNote, deleteNote, type WorkNote } from '@/lib/work/notes';
@@ -23,6 +25,7 @@ export default function WorkPage() {
   const [categories, setCategories] = useState<WorkNoteCategory[]>([]);
   const [notes, setNotes] = useState<WorkNote[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [editingNote, setEditingNote] = useState<WorkNote | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showNewCategory, setShowNewCategory] = useState(false);
@@ -110,21 +113,21 @@ export default function WorkPage() {
 
     try {
       if (editingNote?.id) {
-        // Update existing
         const updated = await updateNote(editingNote.id, {
           title: note.title,
           body: note.body,
           categoryId: note.category_id,
         });
         setNotes((prev) => prev.map((n) => (n.id === editingNote.id ? updated : n)));
+        setSelectedNoteId(updated.id);
       } else {
-        // Create new
         const newNote = await createNote(profileId, {
           title: note.title || '',
           body: note.body || '',
           categoryId: note.category_id || null,
         });
         setNotes((prev) => [newNote, ...prev]);
+        setSelectedNoteId(newNote.id);
       }
       setEditingNote(null);
     } catch (err: any) {
@@ -140,6 +143,7 @@ export default function WorkPage() {
     try {
       await deleteNote(id, profileId);
       setNotes((prev) => prev.filter((n) => n.id !== id));
+      if (selectedNoteId === id) setSelectedNoteId(null);
     } catch (err: any) {
       setError(err?.message || 'Failed to delete note');
       setTimeout(() => setError(null), 3000);
@@ -387,7 +391,7 @@ export default function WorkPage() {
               Add task
             </button>
             <button
-              onClick={() => setEditingNote({} as WorkNote)}
+              onClick={() => { setActiveView('notes'); setEditingNote({} as WorkNote); setSelectedNoteId(null); }}
               className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -449,62 +453,116 @@ export default function WorkPage() {
                     ))}
                   </div>
                 </div>
-                <div className="p-6 min-h-[320px] overflow-y-auto max-h-[50vh]">
+                <div className={`p-0 min-h-[320px] overflow-hidden flex ${activeView === 'notes' ? 'flex-row min-h-[420px]' : ''}`}>
                   {activeView === 'notes' && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <button
-                          onClick={() => setSelectedCategoryId(null)}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                            selectedCategoryId === null ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'
-                          }`}
-                        >All</button>
-                        {categories.map((cat) => (
+                    <div className="flex flex-1 min-w-0 border-l border-neutral-200">
+                      {/* Left: scrollable note list */}
+                      <div className="w-72 flex-shrink-0 flex flex-col border-r border-neutral-200">
+                        <div className="p-3 border-b border-neutral-200 flex gap-2 flex-wrap">
                           <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategoryId(cat.id)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                              selectedCategoryId === cat.id ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'
-                            }`}
-                          >{cat.name}</button>
-                        ))}
-                        {showNewCategory ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="text"
-                              placeholder="Category"
-                              value={newCategoryName}
-                              onChange={(e) => setNewCategoryName(e.target.value)}
-                              onKeyDown={(e) => { if (e.key === 'Enter') handleCreateCategory(); if (e.key === 'Escape') { setShowNewCategory(false); setNewCategoryName(''); } }}
-                              className="px-2 py-1 rounded-lg bg-neutral-50 border-0 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-accent"
-                              autoFocus
-                            />
-                            <button onClick={handleCreateCategory} className="p-1.5 bg-accent text-white rounded-lg"><Check className="w-3 h-3" /></button>
-                            <button onClick={() => { setShowNewCategory(false); setNewCategoryName(''); }} className="p-1.5 bg-neutral-100 rounded-lg"><X className="w-3 h-3" /></button>
-                          </div>
-                        ) : (
-                          <button onClick={() => setShowNewCategory(true)} className="px-3 py-1.5 rounded-lg text-sm bg-neutral-100 text-neutral-600">+ Category</button>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        {filteredNotes.map((note) => (
-                          <div key={note.id} className="flex items-start justify-between gap-2 p-3 rounded-xl bg-neutral-50 hover:bg-neutral-100">
-                            <button onClick={() => setEditingNote(note)} className="flex-1 text-left min-w-0">
-                              <h3 className="font-medium text-neutral-900 truncate">{note.title || 'Untitled'}</h3>
-                              <p className="text-xs text-neutral-500 truncate mt-0.5">{note.body ? (note.body.length > 60 ? `${note.body.slice(0, 60)}…` : note.body) : 'No content'}</p>
+                            onClick={() => setSelectedCategoryId(null)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium ${selectedCategoryId === null ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'}`}
+                          >All</button>
+                          {categories.map((cat) => (
+                            <button
+                              key={cat.id}
+                              onClick={() => setSelectedCategoryId(cat.id)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-medium ${selectedCategoryId === cat.id ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'}`}
+                            >{cat.name}</button>
+                          ))}
+                          {showNewCategory ? (
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="text"
+                                placeholder="Name"
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleCreateCategory(); if (e.key === 'Escape') { setShowNewCategory(false); setNewCategoryName(''); } }}
+                                className="px-2 py-1 rounded-lg bg-neutral-50 border-0 text-xs w-20 focus:outline-none focus:ring-1 focus:ring-accent"
+                                autoFocus
+                              />
+                              <button onClick={handleCreateCategory} className="p-1 bg-accent text-white rounded"><Check className="w-3 h-3" /></button>
+                              <button onClick={() => { setShowNewCategory(false); setNewCategoryName(''); }} className="p-1 bg-neutral-100 rounded"><X className="w-3 h-3" /></button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setShowNewCategory(true)} className="px-2 py-1 rounded-lg text-xs bg-neutral-100 text-neutral-600">+</button>
+                          )}
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                          <button
+                            onClick={() => { setEditingNote({} as WorkNote); setSelectedNoteId(null); }}
+                            className="w-full py-2.5 px-3 rounded-xl text-accent font-medium hover:bg-accent/5 flex items-center gap-2 text-sm"
+                          >
+                            <Plus className="w-4 h-4" />
+                            New note
+                          </button>
+                          {filteredNotes.map((note) => (
+                            <button
+                              key={note.id}
+                              onClick={() => { setSelectedNoteId(note.id); setEditingNote(null); }}
+                              className={`w-full text-left py-2.5 px-3 rounded-xl transition-colors ${
+                                selectedNoteId === note.id && !editingNote
+                                  ? 'bg-accent/10 border border-accent/30'
+                                  : 'hover:bg-neutral-50'
+                              }`}
+                            >
+                              <p className="font-medium text-neutral-900 truncate text-sm">{note.title || 'Untitled'}</p>
+                              <p className="text-xs text-neutral-500 truncate mt-0.5">{note.body ? (note.body.length > 50 ? `${note.body.slice(0, 50)}…` : note.body) : 'No content'}</p>
                             </button>
-                            <div className="flex gap-1 flex-shrink-0">
-                              <button onClick={() => setEditingNote(note)} className="p-1.5 text-neutral-400 hover:text-accent rounded"><Edit2 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteNote(note.id)} className="p-1.5 text-neutral-400 hover:text-red-500 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                          ))}
+                          {filteredNotes.length === 0 && <p className="text-xs text-neutral-400 py-4 px-2">No notes</p>}
+                        </div>
+                      </div>
+                      {/* Right: expanded viewer or editor */}
+                      <div className="flex-1 min-w-0 flex flex-col bg-white">
+                        {editingNote !== null ? (
+                          <NoteEditor
+                            title={editingNote.title || ''}
+                            body={editingNote.body || ''}
+                            categoryId={editingNote.category_id || null}
+                            categories={categories}
+                            onTitleChange={(t) => setEditingNote({ ...editingNote, title: t })}
+                            onBodyChange={(b) => setEditingNote({ ...editingNote, body: b })}
+                            onCategoryChange={(c) => setEditingNote({ ...editingNote, category_id: c })}
+                            onSave={() => handleSaveNote(editingNote)}
+                            onCancel={() => { setEditingNote(null); if (editingNote.id) setSelectedNoteId(editingNote.id); }}
+                            isNew={!editingNote.id}
+                          />
+                        ) : selectedNoteId ? (
+                          (() => {
+                            const note = notes.find((n) => n.id === selectedNoteId);
+                            if (!note) return null;
+                            return (
+                              <NoteViewer
+                                title={note.title}
+                                body={note.body}
+                                categoryName={categories.find((c) => c.id === note.category_id)?.name}
+                                updatedAt={note.updated_at}
+                                onEdit={() => setEditingNote(note)}
+                                onDelete={() => handleDeleteNote(note.id)}
+                              />
+                            );
+                          })()
+                        ) : (
+                          <div className="flex-1 flex items-center justify-center text-neutral-400 p-8">
+                            <div className="text-center">
+                              <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                              <p className="text-sm font-medium">Select a note</p>
+                              <p className="text-xs mt-1">or create a new one</p>
+                              <button
+                                onClick={() => setEditingNote({} as WorkNote)}
+                                className="mt-4 px-4 py-2 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent-dark"
+                              >
+                                New note
+                              </button>
                             </div>
                           </div>
-                        ))}
-                        {filteredNotes.length === 0 && <p className="text-sm text-neutral-400 py-4">No notes in this category.</p>}
+                        )}
                       </div>
                     </div>
                   )}
                   {activeView === 'todos' && (
-                    <div className="space-y-4">
+                    <div className="p-6 overflow-y-auto max-h-[50vh] space-y-4 flex-1 min-w-0">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -537,7 +595,7 @@ export default function WorkPage() {
                     </div>
                   )}
                   {activeView === 'edits' && (
-                    <div className="space-y-4">
+                    <div className="p-6 overflow-y-auto max-h-[50vh] space-y-4 flex-1 min-w-0">
                       <div className="flex gap-2 flex-wrap">
                         {(['all', 'short_form', 'long_form', 'full_episode'] as const).map((f) => (
                           <button key={f} onClick={() => setEditFilter(f)} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${editFilter === f ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'}`}>
@@ -603,7 +661,7 @@ export default function WorkPage() {
                 </div>
                 <div className="p-6">
                   <button
-                    onClick={() => setEditingNote({} as WorkNote)}
+                    onClick={() => { setActiveView('notes'); setEditingNote({} as WorkNote); setSelectedNoteId(null); }}
                     className="w-full py-2.5 px-4 rounded-xl border border-neutral-200 text-neutral-600 text-sm font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mb-4"
                   >
                     <Plus className="w-4 h-4" />
@@ -616,7 +674,7 @@ export default function WorkPage() {
                       recentNotes.map((note) => (
                         <li key={note.id}>
                           <button
-                            onClick={() => setEditingNote(note)}
+                            onClick={() => { setActiveView('notes'); setEditingNote(note); setSelectedNoteId(note.id); }}
                             className="w-full text-left p-3 rounded-xl hover:bg-neutral-50 transition-colors"
                           >
                             <p className="text-sm font-medium text-neutral-900 truncate">{note.title || 'Untitled'}</p>
@@ -723,135 +781,95 @@ export default function WorkPage() {
           </div>
         )}
 
-        {/* Notes View */}
+        {/* Notes View - split layout on mobile too */}
         {!loading && activeView === 'notes' && (
-          <div className="space-y-4">
-            {/* Categories */}
-            <div className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+          <div className="flex flex-col gap-4 -mx-4 sm:mx-0">
+            {/* Categories + scrollable list */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-neutral-200 flex gap-2 overflow-x-auto">
                 <button
                   onClick={() => setSelectedCategoryId(null)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                    selectedCategoryId === null
-                      ? 'bg-accent text-white'
-                      : 'bg-neutral-100 text-neutral-600'
+                  className={`px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap ${
+                    selectedCategoryId === null ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'
                   }`}
-                >
-                  All
-                </button>
+                >All</button>
                 {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategoryId(cat.id)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                      selectedCategoryId === cat.id
-                        ? 'bg-accent text-white'
-                        : 'bg-neutral-100 text-neutral-600'
+                  <button key={cat.id} onClick={() => setSelectedCategoryId(cat.id)}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap ${
+                      selectedCategoryId === cat.id ? 'bg-accent text-white' : 'bg-neutral-100 text-neutral-600'
                     }`}
-                  >
-                    {cat.name}
-                  </button>
+                  >{cat.name}</button>
                 ))}
                 {showNewCategory ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Category name"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleCreateCategory();
-                        if (e.key === 'Escape') {
-                          setShowNewCategory(false);
-                          setNewCategoryName('');
-                        }
-                      }}
-                      className="px-3 py-2 rounded-xl bg-neutral-50 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleCreateCategory}
-                      className="p-2 bg-accent text-white rounded-xl"
-                    >
-                      <Check className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowNewCategory(false);
-                        setNewCategoryName('');
-                      }}
-                      className="p-2 bg-neutral-100 text-neutral-600 rounded-xl"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                  <div className="flex items-center gap-1">
+                    <input type="text" placeholder="Category" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleCreateCategory(); if (e.key === 'Escape') { setShowNewCategory(false); setNewCategoryName(''); } }}
+                      className="px-2 py-1 rounded-lg bg-neutral-50 border-0 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-accent" autoFocus />
+                    <button onClick={handleCreateCategory} className="p-2 bg-accent text-white rounded-lg"><Check className="w-3 h-3" /></button>
+                    <button onClick={() => { setShowNewCategory(false); setNewCategoryName(''); }} className="p-2 bg-neutral-100 rounded-lg"><X className="w-3 h-3" /></button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setShowNewCategory(true)}
-                    className="px-4 py-2 rounded-xl text-sm font-medium bg-neutral-100 text-neutral-600 whitespace-nowrap"
-                  >
-                    + Category
-                  </button>
+                  <button onClick={() => setShowNewCategory(true)} className="px-3 py-2 rounded-xl text-sm bg-neutral-100 text-neutral-600">+ Category</button>
                 )}
+              </div>
+              <div className="max-h-[200px] overflow-y-auto p-2 space-y-1">
+                <button onClick={() => { setEditingNote({} as WorkNote); setSelectedNoteId(null); }}
+                  className="w-full py-2.5 px-3 rounded-xl text-accent font-medium hover:bg-accent/5 flex items-center gap-2 text-sm">
+                  <Plus className="w-4 h-4" />
+                  New note
+                </button>
+                {filteredNotes.map((note) => (
+                  <button key={note.id} onClick={() => { setSelectedNoteId(note.id); setEditingNote(null); }}
+                    className={`w-full text-left py-2.5 px-3 rounded-xl transition-colors ${
+                      selectedNoteId === note.id && !editingNote ? 'bg-accent/10 border border-accent/30' : 'hover:bg-neutral-50'
+                    }`}>
+                    <p className="font-medium text-neutral-900 truncate text-sm">{note.title || 'Untitled'}</p>
+                    <p className="text-xs text-neutral-500 truncate">{note.body ? (note.body.length > 40 ? `${note.body.slice(0, 40)}…` : note.body) : 'No content'}</p>
+                  </button>
+                ))}
+                {filteredNotes.length === 0 && <p className="text-xs text-neutral-400 py-4 px-2">No notes</p>}
               </div>
             </div>
 
-            {/* Notes List */}
-            <div className="space-y-3">
-              <button
-                onClick={() => setEditingNote({} as WorkNote)}
-                className="w-full bg-white rounded-2xl shadow-sm p-4 flex items-center justify-center gap-2 text-accent font-medium hover:bg-neutral-50 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                New Note
-              </button>
-
-              {filteredNotes.map((note) => (
-                <div
-                  key={note.id}
-                  className="bg-white rounded-2xl shadow-sm p-4"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-neutral-900 mb-1">
-                        {note.title}
-                      </h3>
-                      {note.category_id && (
-                        <span className="inline-block px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-lg text-xs font-medium mb-2">
-                          {categories.find((c) => c.id === note.category_id)?.name}
-                        </span>
-                      )}
-                      <p className="text-sm text-neutral-600 whitespace-pre-wrap">
-                        {note.body}
-                      </p>
-                      <p className="text-xs text-neutral-400 mt-2">
-                        {new Date(note.updated_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => setEditingNote(note)}
-                        className="p-2 text-neutral-400 hover:text-accent rounded-lg hover:bg-neutral-50"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="p-2 text-neutral-400 hover:text-red-500 rounded-lg hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {filteredNotes.length === 0 && (
-                <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-                  <p className="text-neutral-500">No notes yet.</p>
-                </div>
-              )}
-            </div>
+            {/* Expanded viewer or editor - large viewport */}
+            {(editingNote !== null || selectedNoteId) ? (
+              <div className="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[360px]">
+                {editingNote !== null ? (
+                  <NoteEditor
+                    title={editingNote.title || ''}
+                    body={editingNote.body || ''}
+                    categoryId={editingNote.category_id || null}
+                    categories={categories}
+                    onTitleChange={(t) => setEditingNote({ ...editingNote, title: t })}
+                    onBodyChange={(b) => setEditingNote({ ...editingNote, body: b })}
+                    onCategoryChange={(c) => setEditingNote({ ...editingNote, category_id: c })}
+                    onSave={() => handleSaveNote(editingNote)}
+                    onCancel={() => { setEditingNote(null); if (editingNote.id) setSelectedNoteId(editingNote.id); }}
+                    isNew={!editingNote.id}
+                  />
+                ) : selectedNoteId ? (
+                  (() => {
+                    const note = notes.find((n) => n.id === selectedNoteId);
+                    if (!note) return null;
+                    return (
+                      <NoteViewer
+                        title={note.title}
+                        body={note.body}
+                        categoryName={categories.find((c) => c.id === note.category_id)?.name}
+                        updatedAt={note.updated_at}
+                        onEdit={() => setEditingNote(note)}
+                        onDelete={() => handleDeleteNote(note.id)}
+                      />
+                    );
+                  })()
+                ) : null}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm p-8 text-center text-neutral-400">
+                <FileText className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Select a note or create a new one</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -1129,80 +1147,6 @@ export default function WorkPage() {
         )}
         </div>
 
-        {/* Note Editor Modal - shared across desktop and mobile */}
-        {editingNote !== null && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
-            <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-neutral-900">
-                  {editingNote.id ? 'Edit Note' : 'New Note'}
-                </h2>
-                <button
-                  onClick={() => setEditingNote(null)}
-                  className="p-2 text-neutral-400 hover:text-neutral-600 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={editingNote.title || ''}
-                  onChange={(e) =>
-                    setEditingNote({ ...editingNote, title: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-
-                <textarea
-                  placeholder="Body"
-                  value={editingNote.body || ''}
-                  onChange={(e) =>
-                    setEditingNote({ ...editingNote, body: e.target.value })
-                  }
-                  rows={8}
-                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                />
-
-                <select
-                  value={editingNote.category_id || ''}
-                  onChange={(e) =>
-                    setEditingNote({
-                      ...editingNote,
-                      category_id: e.target.value || null,
-                    })
-                  }
-                  className="w-full px-4 py-3 bg-neutral-50 rounded-xl border-0 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                  <option value="">No Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleSaveNote(editingNote)}
-                    className="flex-1 px-4 py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-dark transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingNote(null)}
-                    className="px-4 py-3 bg-neutral-100 text-neutral-600 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </AppShell>
   );
