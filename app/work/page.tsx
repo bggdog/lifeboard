@@ -344,6 +344,22 @@ export default function WorkPage() {
   const filteredEditItems = editFilter === 'all' 
     ? editItems 
     : editItems.filter((item) => item.type === editFilter);
+  const sortedFilteredEditItems = [...filteredEditItems].sort((a, b) => {
+    const aDone = a.status === 'done';
+    const bDone = b.status === 'done';
+
+    // Keep completed edits at the bottom of the list.
+    if (aDone !== bDone) return aDone ? 1 : -1;
+
+    const aTime = aDone
+      ? new Date(a.completed_at || a.created_at).getTime()
+      : new Date(a.created_at).getTime();
+    const bTime = bDone
+      ? new Date(b.completed_at || b.created_at).getTime()
+      : new Date(b.created_at).getTime();
+
+    return bTime - aTime;
+  });
 
   const filteredNotes = selectedCategoryId
     ? notes.filter((note) => note.category_id === selectedCategoryId)
@@ -624,7 +640,7 @@ export default function WorkPage() {
                         <button onClick={handleAddEditItem} className="px-4 py-2 bg-accent text-white rounded-xl text-sm font-medium">Add</button>
                       </div>
                       <div className="space-y-2">
-                        {filteredEditItems.map((item) => (
+                        {sortedFilteredEditItems.map((item) => (
                           <div key={item.id} className="flex items-center gap-2 p-3 rounded-xl bg-neutral-50">
                             <div className="flex-1 min-w-0">
                               <p className={`text-sm font-medium truncate ${item.status === 'done' ? 'line-through text-neutral-400' : 'text-neutral-900'}`}>{item.title}</p>
@@ -639,7 +655,7 @@ export default function WorkPage() {
                             <button onClick={() => handleDeleteEditItem(item)} className="p-1.5 text-neutral-400 hover:text-red-500 rounded flex-shrink-0">{deletingEditId === item.id ? <X className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}</button>
                           </div>
                         ))}
-                        {filteredEditItems.length === 0 && <p className="text-sm text-neutral-400 py-4">No edit items.</p>}
+                        {sortedFilteredEditItems.length === 0 && <p className="text-sm text-neutral-400 py-4">No edit items.</p>}
                       </div>
                     </div>
                   )}
@@ -1062,7 +1078,7 @@ export default function WorkPage() {
 
             {/* Edit Items List */}
             <div className="space-y-3">
-              {filteredEditItems.map((item) => {
+              {sortedFilteredEditItems.map((item) => {
                 const isDone = item.status === 'done';
                 return (
                   <div
@@ -1138,7 +1154,7 @@ export default function WorkPage() {
                 );
               })}
 
-              {filteredEditItems.length === 0 && (
+              {sortedFilteredEditItems.length === 0 && (
                 <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
                   <p className="text-neutral-500">No edit items yet.</p>
                 </div>
