@@ -28,11 +28,13 @@ import { subscribeToTable, subscribeToProfile } from '@/lib/realtime';
 import { applyPassiveDecay } from '@/lib/lifeDecay';
 import { getLastWeekIncompleteReview } from '@/lib/weeklyReview';
 import { getTimeAwareHeader, getTimeAwareToneClass, getRelativeTimeText } from '@/lib/timeOfDay';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 type QuickAddMode = 'todo' | 'work' | 'habit' | 'lift';
 
 export default function TodayPage() {
   const router = useRouter();
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [profileId, setProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -619,6 +621,22 @@ export default function TodayPage() {
   const actionsToday = todayStats?.actions_completed ?? 0;
   const goalMet = actionsToday >= 3;
   const timeAwareTone = getTimeAwareToneClass();
+  const remainingHabits = habits.filter((habit) => !(habitCompletions[habit.id]?.has(today) || false)).length;
+  const remainingTasks = todos.length + workTodos.length;
+  const topFocusTask = workTodos[0] ?? todos[0];
+  const topFocusIsWork = Boolean(workTodos[0]);
+
+  const getLifeAreaPillClass = (status: string) => {
+    if (status === 'Excellent' || status === 'Good') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'Okay') return 'bg-amber-100 text-amber-700';
+    return 'bg-red-100 text-red-700';
+  };
+
+  const getLifeAreaBarClass = (status: string) => {
+    if (status === 'Excellent' || status === 'Good') return 'bg-emerald-500';
+    if (status === 'Okay') return 'bg-amber-500';
+    return 'bg-red-500';
+  };
 
   return (
     <AppShell>
@@ -636,6 +654,162 @@ export default function TodayPage() {
           </div>
         )}
 
+        {isDesktop && (
+          <>
+            <div className="bg-white border border-neutral-200 rounded-xl px-4 py-3 flex items-center justify-between">
+              <p className="text-sm text-neutral-500">
+                Good morning, <span className="text-neutral-900 font-medium">Branson</span> — you have {remainingHabits} habits and {remainingTasks} tasks left today.
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
+                  {tokenStore.getBalance()} coins
+                </div>
+                <div className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium">
+                  Lv {level}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-xl bg-accent p-5 text-white">
+                <p className="text-xs text-white/80 mb-1">Actions today</p>
+                <p className="text-3xl font-semibold">{actionsToday} / 3</p>
+                <p className="text-xs text-white/80 mt-1">{Math.max(0, 3 - actionsToday)} more to hit your daily goal</p>
+                <div className="h-1 rounded-full bg-white/30 mt-3 overflow-hidden">
+                  <div className="h-full bg-white" style={{ width: `${Math.min((actionsToday / 3) * 100, 100)}%` }} />
+                </div>
+              </div>
+              <div className="rounded-xl bg-white border border-neutral-200 p-5">
+                <p className="text-xs text-neutral-500 mb-1">Daily streak</p>
+                <p className="text-3xl font-semibold text-neutral-900">{todayStats?.streak ?? 0} days</p>
+                <p className="text-xs text-neutral-500 mt-1">{goalMet ? 'On track today' : 'Complete goal to build streak'}</p>
+              </div>
+              <div className="rounded-xl bg-white border border-neutral-200 p-5">
+                <p className="text-xs text-neutral-500 mb-1">Tokens today</p>
+                <p className="text-3xl font-semibold text-neutral-900">+{todayStats?.tokens_earned ?? 0}</p>
+                <p className="text-xs text-amber-700 mt-1">Keep stacking rewards</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-gradient-to-r from-accent-dark to-accent p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-white/80">Today's focus</p>
+                <p className="text-sm font-medium text-white truncate">
+                  {topFocusTask ? topFocusTask.title : 'No focus task yet - add one in Quick Add'}
+                </p>
+              </div>
+              {topFocusTask ? (
+                <button
+                  onClick={() => {
+                    if (topFocusIsWork) handleToggleWorkTodo(topFocusTask as WorkTodo);
+                    else handleToggleTodo(topFocusTask as Todo);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium"
+                >
+                  Mark done
+                </button>
+              ) : null}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <SectionHeader
+                  title="Today's Habits"
+                  action={
+                    <button
+                      onClick={() => router.push('/habits')}
+                      className="text-sm text-accent font-medium"
+                    >
+                      View all
+                    </button>
+                  }
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  {habits.slice(0, 4).map((habit) => {
+                    const isCompleted = habitCompletions[habit.id]?.has(today) || false;
+                    return (
+                      <button
+                        key={habit.id}
+                        onClick={() => handleToggleHabit(habit)}
+                        disabled={pendingToggles.has(habit.id)}
+                        className={`p-3 rounded-lg border text-left transition-colors ${
+                          isCompleted ? 'bg-green-50 border-green-200' : 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100'
+                        }`}
+                      >
+                        <p className={`text-sm font-medium ${isCompleted ? 'text-green-900 line-through' : 'text-neutral-900'}`}>{habit.title}</p>
+                        <p className={`text-xs mt-1 ${isCompleted ? 'text-green-700' : 'text-neutral-500'}`}>+{habit.tokens} coins</p>
+                      </button>
+                    );
+                  })}
+                  {habits.length === 0 && <p className="text-sm text-neutral-400 col-span-2">No habits yet.</p>}
+                </div>
+              </Card>
+
+              <Card>
+                <SectionHeader
+                  title="Personal To Dos"
+                  action={
+                    <button
+                      onClick={() => router.push('/todo')}
+                      className="text-sm text-accent font-medium"
+                    >
+                      View all
+                    </button>
+                  }
+                />
+                <div className="space-y-2">
+                  {[...todos, ...workTodos].slice(0, 4).map((todo) => (
+                    <button
+                      key={todo.id}
+                      onClick={() => ('completed_at' in todo ? handleToggleWorkTodo(todo as WorkTodo) : handleToggleTodo(todo as Todo))}
+                      disabled={pendingToggles.has(todo.id)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 text-left"
+                    >
+                      <div className="w-4 h-4 rounded border border-neutral-300 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-neutral-900 truncate">{todo.title}</p>
+                        <p className="text-xs text-neutral-500">{getRelativeTimeText(todo.created_at)}</p>
+                      </div>
+                      <span className="text-xs text-amber-700 font-medium">+{todo.tokens}</span>
+                    </button>
+                  ))}
+                  {todos.length + workTodos.length === 0 && <p className="text-sm text-neutral-400">No todos yet.</p>}
+                </div>
+              </Card>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Life areas</p>
+              <div className="grid grid-cols-3 gap-3">
+                {lifeAreas.map((area) => {
+                  const score = lifeAreaScores[area.id];
+                  const scoreValue = score?.score ?? 0;
+                  const status = score?.status ?? 'At Risk';
+                  return (
+                    <div key={area.id} className="bg-white border border-neutral-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{area.icon}</span>
+                        <span className="text-sm font-medium text-neutral-900 flex-1">{area.name}</span>
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full ${getLifeAreaPillClass(status)}`}>{status}</span>
+                      </div>
+                      <p className="text-2xl font-semibold text-neutral-900">{scoreValue}</p>
+                      <div className="h-1 rounded-full bg-neutral-200 mt-2 overflow-hidden">
+                        <div className={`h-full ${getLifeAreaBarClass(status)}`} style={{ width: `${Math.min(scoreValue, 100)}%` }} />
+                      </div>
+                      <p className="text-xs text-neutral-500 mt-2">{scoreValue} / 100</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {!isDesktop && (
+        <>
         {/* Desktop-only: Dashboard title + KPI cards */}
         <div className="hidden lg:block mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -1123,6 +1297,8 @@ export default function TodayPage() {
               Start by adding something above.
             </p>
           </div>
+        )}
+        </>
         )}
       </AnimateStagger>
     </AppShell>
