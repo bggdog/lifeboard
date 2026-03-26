@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Plus, Flame, Sparkles, ArrowRight, Home, Coins } from 'lucide-react';
+import { Check, Plus, Flame, Sparkles, ArrowRight, Home, Coins, Search, Bell, MoreHorizontal } from 'lucide-react';
 import AppShell from '@/components/AppShell';
 import AnimateStagger from '@/components/ui/AnimateStagger';
 import Card from '@/components/ui/Card';
@@ -623,20 +623,6 @@ export default function TodayPage() {
   const timeAwareTone = getTimeAwareToneClass();
   const remainingHabits = habits.filter((habit) => !(habitCompletions[habit.id]?.has(today) || false)).length;
   const remainingTasks = todos.length + workTodos.length;
-  const topFocusTask = workTodos[0] ?? todos[0];
-  const topFocusIsWork = Boolean(workTodos[0]);
-
-  const getLifeAreaPillClass = (status: string) => {
-    if (status === 'Excellent' || status === 'Good') return 'bg-emerald-100 text-emerald-700';
-    if (status === 'Okay') return 'bg-amber-100 text-amber-700';
-    return 'bg-red-100 text-red-700';
-  };
-
-  const getLifeAreaBarClass = (status: string) => {
-    if (status === 'Excellent' || status === 'Good') return 'bg-emerald-500';
-    if (status === 'Okay') return 'bg-amber-500';
-    return 'bg-red-500';
-  };
 
   return (
     <AppShell>
@@ -656,153 +642,146 @@ export default function TodayPage() {
 
         {isDesktop && (
           <>
-            <div className="bg-white border border-neutral-200 rounded-xl px-4 py-3 flex items-center justify-between">
-              <p className="text-sm text-neutral-500">
-                Good morning, <span className="text-neutral-900 font-medium">Branson</span> — you have {remainingHabits} habits and {remainingTasks} tasks left today.
-              </p>
+            <div className="bg-white border border-neutral-200 rounded-2xl px-5 py-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <h1 className="text-4xl font-semibold text-neutral-900 leading-none">Dashboard</h1>
+                <div className="relative min-w-[220px]">
+                  <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    className="w-full rounded-full bg-neutral-100 pl-9 pr-4 py-2 text-sm text-neutral-600 border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                    placeholder="Search"
+                    readOnly
+                  />
+                </div>
+              </div>
               <div className="flex items-center gap-2">
-                <div className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
-                  {tokenStore.getBalance()} coins
-                </div>
-                <div className="px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                  Lv {level}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-accent p-5 text-white">
-                <p className="text-xs text-white/80 mb-1">Actions today</p>
-                <p className="text-3xl font-semibold">{actionsToday} / 3</p>
-                <p className="text-xs text-white/80 mt-1">{Math.max(0, 3 - actionsToday)} more to hit your daily goal</p>
-                <div className="h-1 rounded-full bg-white/30 mt-3 overflow-hidden">
-                  <div className="h-full bg-white" style={{ width: `${Math.min((actionsToday / 3) * 100, 100)}%` }} />
-                </div>
-              </div>
-              <div className="rounded-xl bg-white border border-neutral-200 p-5">
-                <p className="text-xs text-neutral-500 mb-1">Daily streak</p>
-                <p className="text-3xl font-semibold text-neutral-900">{todayStats?.streak ?? 0} days</p>
-                <p className="text-xs text-neutral-500 mt-1">{goalMet ? 'On track today' : 'Complete goal to build streak'}</p>
-              </div>
-              <div className="rounded-xl bg-white border border-neutral-200 p-5">
-                <p className="text-xs text-neutral-500 mb-1">Tokens today</p>
-                <p className="text-3xl font-semibold text-neutral-900">+{todayStats?.tokens_earned ?? 0}</p>
-                <p className="text-xs text-amber-700 mt-1">Keep stacking rewards</p>
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-gradient-to-r from-accent-dark to-accent p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-white/80">Today's focus</p>
-                <p className="text-sm font-medium text-white truncate">
-                  {topFocusTask ? topFocusTask.title : 'No focus task yet - add one in Quick Add'}
-                </p>
-              </div>
-              {topFocusTask ? (
-                <button
-                  onClick={() => {
-                    if (topFocusIsWork) handleToggleWorkTodo(topFocusTask as WorkTodo);
-                    else handleToggleTodo(topFocusTask as Todo);
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-medium"
-                >
-                  Mark done
+                <button className="px-4 py-2 rounded-full bg-neutral-900 text-white text-sm font-medium">
+                  New Action
                 </button>
-              ) : null}
+                <button className="p-2 rounded-full border border-neutral-200 text-neutral-500">
+                  <Bell className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <SectionHeader
-                  title="Today's Habits"
-                  action={
-                    <button
-                      onClick={() => router.push('/habits')}
-                      className="text-sm text-accent font-medium"
-                    >
-                      View all
-                    </button>
-                  }
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  {habits.slice(0, 4).map((habit) => {
-                    const isCompleted = habitCompletions[habit.id]?.has(today) || false;
-                    return (
-                      <button
-                        key={habit.id}
-                        onClick={() => handleToggleHabit(habit)}
-                        disabled={pendingToggles.has(habit.id)}
-                        className={`p-3 rounded-lg border text-left transition-colors ${
-                          isCompleted ? 'bg-green-50 border-green-200' : 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100'
-                        }`}
-                      >
-                        <p className={`text-sm font-medium ${isCompleted ? 'text-green-900 line-through' : 'text-neutral-900'}`}>{habit.title}</p>
-                        <p className={`text-xs mt-1 ${isCompleted ? 'text-green-700' : 'text-neutral-500'}`}>+{habit.tokens} coins</p>
-                      </button>
-                    );
-                  })}
-                  {habits.length === 0 && <p className="text-sm text-neutral-400 col-span-2">No habits yet.</p>}
-                </div>
-              </Card>
-
-              <Card>
-                <SectionHeader
-                  title="Personal To Dos"
-                  action={
-                    <button
-                      onClick={() => router.push('/todo')}
-                      className="text-sm text-accent font-medium"
-                    >
-                      View all
-                    </button>
-                  }
-                />
-                <div className="space-y-2">
-                  {[...todos, ...workTodos].slice(0, 4).map((todo) => (
-                    <button
-                      key={todo.id}
-                      onClick={() => ('completed_at' in todo ? handleToggleWorkTodo(todo as WorkTodo) : handleToggleTodo(todo as Todo))}
-                      disabled={pendingToggles.has(todo.id)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 text-left"
-                    >
-                      <div className="w-4 h-4 rounded border border-neutral-300 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-neutral-900 truncate">{todo.title}</p>
-                        <p className="text-xs text-neutral-500">{getRelativeTimeText(todo.created_at)}</p>
-                      </div>
-                      <span className="text-xs text-amber-700 font-medium">+{todo.tokens}</span>
-                    </button>
-                  ))}
-                  {todos.length + workTodos.length === 0 && <p className="text-sm text-neutral-400">No todos yet.</p>}
-                </div>
-              </Card>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Life areas</p>
-              <div className="grid grid-cols-3 gap-3">
-                {lifeAreas.map((area) => {
-                  const score = lifeAreaScores[area.id];
-                  const scoreValue = score?.score ?? 0;
-                  const status = score?.status ?? 'At Risk';
-                  return (
-                    <div key={area.id} className="bg-white border border-neutral-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">{area.icon}</span>
-                        <span className="text-sm font-medium text-neutral-900 flex-1">{area.name}</span>
-                        <span className={`text-[11px] px-2 py-0.5 rounded-full ${getLifeAreaPillClass(status)}`}>{status}</span>
-                      </div>
-                      <p className="text-2xl font-semibold text-neutral-900">{scoreValue}</p>
-                      <div className="h-1 rounded-full bg-neutral-200 mt-2 overflow-hidden">
-                        <div className={`h-full ${getLifeAreaBarClass(status)}`} style={{ width: `${Math.min(scoreValue, 100)}%` }} />
-                      </div>
-                      <p className="text-xs text-neutral-500 mt-2">{scoreValue} / 100</p>
+            <div className="grid grid-cols-[2fr_1fr] gap-4">
+              <div className="space-y-4 min-w-0">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-3xl bg-gradient-to-br from-rose-400 to-fuchsia-500 p-5 text-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <p className="text-sm text-white/85">Actions Today</p>
+                      <MoreHorizontal className="w-4 h-4 text-white/85" />
                     </div>
-                  );
-                })}
+                    <p className="text-5xl font-semibold tracking-tight">{actionsToday}</p>
+                    <p className="text-sm text-white/85 mt-1">Goal: 3</p>
+                    <div className="h-1.5 rounded-full bg-white/25 mt-4 overflow-hidden">
+                      <div className="h-full bg-white" style={{ width: `${Math.min((actionsToday / 3) * 100, 100)}%` }} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-4 text-xs">
+                      <div>
+                        <p className="text-white/70">Habits</p>
+                        <p className="font-semibold">{habits.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/70">Tasks</p>
+                        <p className="font-semibold">{remainingTasks}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/70">Level</p>
+                        <p className="font-semibold">{level}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl bg-white border border-neutral-200 p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <p className="text-sm text-neutral-600">Goal Progress</p>
+                      <MoreHorizontal className="w-4 h-4 text-neutral-400" />
+                    </div>
+                    <p className="text-4xl font-semibold text-neutral-900">{Math.min(100, Math.round((actionsToday / 3) * 100))}%</p>
+                    <p className="text-sm text-neutral-500 mt-1">{goalMet ? 'Goal reached today' : `${Math.max(0, 3 - actionsToday)} actions left`}</p>
+                    <div className="mt-5 h-36 rounded-2xl bg-neutral-100 flex items-end gap-2 p-3">
+                      {[28, 45, 34, 60, 76, 52, Math.min(95, actionsToday * 30)].map((h, idx) => (
+                        <div key={idx} className={`flex-1 rounded-full ${idx === 6 ? 'bg-accent' : 'bg-neutral-300'}`} style={{ height: `${h}%` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl bg-white border border-neutral-200 p-5">
+                  <div className="flex items-center gap-6 text-sm mb-3">
+                    <button className="font-semibold text-neutral-900 border-b-2 border-neutral-900 pb-1">Recent Activity</button>
+                    <button className="text-neutral-400">Life Areas</button>
+                  </div>
+                  <div className="space-y-1">
+                    {[...todos, ...workTodos].slice(0, 5).map((todo) => (
+                      <button
+                        key={todo.id}
+                        onClick={() => ('completed_at' in todo ? handleToggleWorkTodo(todo as WorkTodo) : handleToggleTodo(todo as Todo))}
+                        className="w-full p-3 rounded-xl hover:bg-neutral-50 flex items-center gap-3 text-left"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-500">
+                          {todo.title.slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-neutral-900 truncate">{todo.title}</p>
+                          <p className="text-xs text-neutral-500">{getRelativeTimeText(todo.created_at)}</p>
+                        </div>
+                        <div className="text-sm font-medium text-neutral-700 whitespace-nowrap">+{todo.tokens}</div>
+                        <MoreHorizontal className="w-4 h-4 text-neutral-400" />
+                      </button>
+                    ))}
+                    {todos.length + workTodos.length === 0 && (
+                      <p className="text-sm text-neutral-400 py-3">No recent tasks yet.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 min-w-0">
+                <div className="rounded-3xl bg-white border border-neutral-200 p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-semibold">
+                      {tokenStore.getBalance()}
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-neutral-900">Comments</p>
+                      <p className="text-xs text-neutral-500">Engagement trend</p>
+                    </div>
+                  </div>
+                  <div className="h-2 rounded-full bg-neutral-100 overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-rose-400 to-fuchsia-500" style={{ width: `${Math.min(100, Math.max(15, (tokenStore.getBalance() / 100) * 100))}%` }} />
+                  </div>
+                </div>
+
+                <div className="rounded-3xl bg-white border border-neutral-200 p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-sm font-medium text-neutral-700">Post Stats</p>
+                    <MoreHorizontal className="w-4 h-4 text-neutral-400" />
+                  </div>
+                  <div className="h-40 rounded-2xl bg-neutral-100 flex items-end gap-2 p-3">
+                    {[20, 35, 42, 28, 68, 31, 37].map((h, idx) => (
+                      <div key={idx} className={`flex-1 rounded-full ${idx === 4 ? 'bg-rose-400' : 'bg-neutral-300'}`} style={{ height: `${h}%` }} />
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <div>
+                      <p className="text-xs text-neutral-500">Completed Actions</p>
+                      <p className="text-2xl font-semibold text-neutral-900">{actionsToday + (todayStats?.tokens_earned ?? 0)}</p>
+                    </div>
+                    <span className="text-xs text-neutral-500">This week</span>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl bg-white border border-neutral-200 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium text-neutral-700">Links Shared</p>
+                    <span className="text-3xl font-semibold text-neutral-900">{remainingHabits}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-neutral-100 overflow-hidden">
+                    <div className="h-full bg-neutral-900" style={{ width: `${Math.min(100, Math.max(20, remainingHabits * 20))}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
           </>
